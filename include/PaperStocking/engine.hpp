@@ -1,9 +1,8 @@
 #pragma once
 #include <string>
 #include <atomic>
-
-#include "SDL3/SDL_events.h"
-
+#include <SDL3/SDL.h>
+#include <PaperStocking/settings/settingsManager.hpp>
 namespace PaperStocking {
 	struct Engine {
 		public:

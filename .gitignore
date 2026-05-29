@@ -3,7 +3,7 @@
 /external/entt
 /external/entt
 /external/json
-/external/RmlUi
+# /external/RmlUi
 # /external/SDL
 /external/SDL3_image
 # /external/tclap

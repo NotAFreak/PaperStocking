@@ -2,6 +2,9 @@
 #include <tclap/CmdLine.h>
 #include <thread>
 #include "PaperStocking/logger.hpp"
+
+#include <PaperStocking/graphics/renderer.hpp>
+#include <PaperStocking/input/rawInput.hpp>
 using namespace PaperStocking;
 void Engine::Run(int argc, char* argv[]) {
 	PaperStocking::Logger logger("PaperStocking", LogColour::Blue);
@@ -19,9 +22,22 @@ void Engine::Run(int argc, char* argv[]) {
 }
 
 void Engine::RenderThread() {
-
+	RawInput input;
+	Renderer renderer;
+	RawInput::SubscribeListener(EventListener);
+	while (s_Run){
+		input.PollEvents();
+		renderer.Render();
+	}
 }
 
 void Engine::GameThread() {
 
+}
+
+void Engine::EventListener(SDL_Event& event) {
+	switch (event.type) {
+		case SDL_EVENT_QUIT:
+			s_Run = false;
+	}
 }

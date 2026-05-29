@@ -5,4 +5,4 @@ json
 RmlUi
 SDL
 SDL3_image
-tclap
+tclap (1.4.0)

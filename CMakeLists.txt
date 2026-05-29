@@ -9,11 +9,15 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
 )
-add_library(${PROJECT_NAME} ${ENGINE_SOURCES})
+add_library(${PROJECT_NAME} SHARED ${ENGINE_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Libraries
-add_subdirectory(external/tclap)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/tclap)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glad)
+
+# link
 target_link_libraries(${PROJECT_NAME} PUBLIC
     TCLAP
+    GLAD
 )

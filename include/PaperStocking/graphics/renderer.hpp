@@ -1,8 +1,6 @@
-//
-// Created by notafreak on 5/29/26.
-//
+#pragma once
 
-#ifndef SURVIVORLIKE_RENDERER_HPP
-#define SURVIVORLIKE_RENDERER_HPP
+namespace Stocking
+{
 
-#endif //SURVIVORLIKE_RENDERER_HPP
+}

@@ -6,4 +6,4 @@
 /external/RmlUi
 /external/SDL
 /external/SDL3_image
-/external/tclap
+# /external/tclap

@@ -1,0 +1,8 @@
+//
+// Created by notafreak on 5/29/26.
+//
+
+#ifndef SURVIVORLIKE_RENDERER_HPP
+#define SURVIVORLIKE_RENDERER_HPP
+
+#endif //SURVIVORLIKE_RENDERER_HPP

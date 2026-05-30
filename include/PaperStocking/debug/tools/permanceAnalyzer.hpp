@@ -31,6 +31,12 @@ namespace PaperStocking {
                 ImGui::End();
             }
         private:
+            bool LabeledTreeNode(const std::string& name, const std::string& label) {
+                bool open = ImGui::TreeNode(name.c_str());
+                ImGui::SameLine();
+                ImGui::Text(label.c_str());
+                return open;
+            }
             void DisplayRecord(TimerRecord& record) {
                 std::chrono::microseconds microseconds = std::chrono::duration_cast<std::chrono::microseconds>(record.m_EndTime - record.m_StartTime);
                 std::string timeDisplay =
@@ -41,7 +47,7 @@ namespace PaperStocking {
                     ImGui::TreePop();
                     return;
                 }
-                if (ImGui::TreeNode((record.m_Name + " " + timeDisplay).c_str())) {
+                if (LabeledTreeNode(record.m_Name, timeDisplay)) {
                     for (auto& timing : record.m_Children) {
                         DisplayRecord(timing);
                     }

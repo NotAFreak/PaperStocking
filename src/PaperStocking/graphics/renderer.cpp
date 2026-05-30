@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_sdl3.h>
+#include <PaperStocking/debug/timer.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
 using namespace PaperStocking;
 
@@ -69,7 +70,9 @@ void Renderer::Render() {
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // Render
+    Timer::Begin("Debug UI");
     m_DebugUi->Render();
+    Timer::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

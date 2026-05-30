@@ -29,13 +29,17 @@ void Engine::RenderThread() {
 	RawInput input;
 	Renderer renderer;
 	RawInput::SubscribeListener(EventListener);
-	while (s_Run){
+	++m_InitializedThreads;
+	while (m_InitializedThreads < c_RequiredThreadCount) { }
+	while (s_Run) {
 		Timer::Begin("Poll Events");
 		input.PollEvents();
 		Timer::End();
-		Timer::Begin("Render");
+
+		Timer::Begin("Rendering");
 		renderer.Render();
 		Timer::End();
+
 		Timer::FinishThreadFrame();
 	}
 }
@@ -44,6 +48,8 @@ void Engine::GameThread() {
 	Threads::SetThread(ThreadInfo{
 		"Game",1
 	});
+	++m_InitializedThreads;
+	while (m_InitializedThreads < c_RequiredThreadCount) { }
 	while (s_Run) {
 
 	}

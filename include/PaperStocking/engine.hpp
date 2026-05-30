@@ -18,6 +18,8 @@ namespace PaperStocking {
 
 			static void EventListener(SDL_Event& event);
 
-			SettingsManager settingsManager;
+			SettingsManager m_SettingsManager;
+			static inline std::atomic_uint8_t m_InitializedThreads = 0;
+			static constexpr uint8_t c_RequiredThreadCount = 2;
 	};
 }

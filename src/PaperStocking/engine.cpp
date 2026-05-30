@@ -1,8 +1,9 @@
 #include <PaperStocking/engine.hpp>
 #include <tclap/CmdLine.h>
 #include <thread>
-#include "PaperStocking/logger.hpp"
-
+#include <PaperStocking/thread/threads.hpp>
+#include <PaperStocking/debug/timer.hpp>
+#include <PaperStocking/logger.hpp>
 #include <PaperStocking/graphics/renderer.hpp>
 #include <PaperStocking/input/rawInput.hpp>
 using namespace PaperStocking;
@@ -22,17 +23,30 @@ void Engine::Run(int argc, char* argv[]) {
 }
 
 void Engine::RenderThread() {
+	Threads::SetThread(ThreadInfo{
+		"Render",1
+	});
 	RawInput input;
 	Renderer renderer;
 	RawInput::SubscribeListener(EventListener);
 	while (s_Run){
+		Timer::Begin("Poll Events");
 		input.PollEvents();
+		Timer::End();
+		Timer::Begin("Render");
 		renderer.Render();
+		Timer::End();
+		Timer::FinishThreadFrame();
 	}
 }
 
 void Engine::GameThread() {
+	Threads::SetThread(ThreadInfo{
+		"Game",1
+	});
+	while (s_Run) {
 
+	}
 }
 
 void Engine::EventListener(SDL_Event& event) {

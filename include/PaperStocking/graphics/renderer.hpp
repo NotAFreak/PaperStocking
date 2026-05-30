@@ -20,15 +20,18 @@ namespace PaperStocking {
             // GPU Requests
             static const glm::vec4 GetClearColor();
             static void SetClearColor(glm::vec4 color);
+
+            static void SetOutputResolution(glm::uvec2 resolution, bool setWindow = true);
+            static void SetRenderScale(float scale);
         private:
-            static inline Renderer* instance;
+            static inline Renderer* s_Instance;
             Logger m_Logger = Logger("Renderer", LogColour::Blue);
             glm::vec4 m_ClearColor = glm::vec4(0.8f, 0.5f, 0.7f, 0.8f);
             std::unique_ptr<DebugUiManager> m_DebugUi;
 
-            glm::uvec2 renderResolution = {1280, 720};
-            float renderScale = 1.0f;
-            glm::uvec2 outputResolution = {1280, 720};
+            glm::uvec2 m_RenderResolution = {1280, 720};
+            float m_RenderScale = 1.0f;
+            glm::uvec2 m_OutputResolution = {1280, 720};
 
             struct GBuffer {
                 // Framebuffer for the GBuffer

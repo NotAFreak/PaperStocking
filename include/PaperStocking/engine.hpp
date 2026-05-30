@@ -17,5 +17,7 @@ namespace PaperStocking {
 			static void GameThread();
 
 			static void EventListener(SDL_Event& event);
+
+			SettingsManager settingsManager;
 	};
 }

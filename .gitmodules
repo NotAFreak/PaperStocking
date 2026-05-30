@@ -5,3 +5,9 @@
 	path = external/SDL
 	url = https://github.com/libsdl-org/SDL.git
 	branch = release-3.4.x
+[submodule "external/RmlUi"]
+	path = external/RmlUi
+	url = https://github.com/mikke89/RmlUi.git
+[submodule "external/SDL_image"]
+	path = external/SDL_image
+	url = https://github.com/libsdl-org/SDL_image.git

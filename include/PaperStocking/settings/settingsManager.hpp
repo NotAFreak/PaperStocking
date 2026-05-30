@@ -12,12 +12,19 @@ namespace PaperStocking {
     struct SettingsManager {
         public:
             SettingsManager();
-            ~SettingsManager() = default;
+            ~SettingsManager();
 
             template<typename T>
-            static T GetSetting(const std::string& section, const std::string& setting) {
-                assert(s_Instance);
+            static T GetSetting(const std::string& section, const std::string& setting, T defaultValue) {
+                assert(s_Instance != nullptr);
                 std::lock_guard lock(ioMutex);
+                if (!s_Instance->m_Reader.Sections().contains(section)) {
+                    s_Instance->m_Reader.InsertEntry(section, setting, defaultValue);
+                }
+                if (!s_Instance->m_Reader.Keys(section).contains(setting)) {
+                    s_Instance->m_Reader.InsertEntry(section, setting, defaultValue);
+                    return defaultValue;
+                }
                 return s_Instance->m_Reader.Get<T>(section, setting);
             }
 
@@ -25,7 +32,11 @@ namespace PaperStocking {
             static void SetSetting(const std::string& section, const std::string& setting, const T& value, bool save = true) {
                 assert(s_Instance);
                 std::lock_guard lock(ioMutex);
-                s_Instance->m_Reader.InsertEntry(section, setting, value);
+                if (!s_Instance->m_Reader.Sections().contains(section) || !s_Instance->m_Reader.Keys(section).contains(setting)) {
+                    s_Instance->m_Reader.InsertEntry(section, setting, value);
+                } else {
+                    s_Instance->m_Reader.UpdateEntry(section, setting, value);
+                }
                 if (save) {
                     SaveSettings();
                 }
@@ -34,7 +45,7 @@ namespace PaperStocking {
             static void SaveSettings() {
                 assert(s_Instance != nullptr);
                 std::lock_guard lock(ioMutex);
-                s_Instance->m_Writer.write(SETTINGS_PATH, s_Instance->m_Reader);
+                s_Instance->m_Writer.write(SETTINGS_PATH, s_Instance->m_Reader, true);
             }
         private:
             static inline SettingsManager* s_Instance;

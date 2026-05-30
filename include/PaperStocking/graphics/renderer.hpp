@@ -8,6 +8,19 @@
 
 namespace PaperStocking {
     using GPU_LOC = GLuint;
+    struct RenderCommand {
+        GPU_LOC shader;
+    };
+    struct RenderBatch {
+        enum BatchSortMode {
+            FrontToBack,
+            BackToFront
+        } m_SortMode;
+        std::vector<RenderCommand> m_Commands;
+    };
+    struct RenderData {
+        std::vector<RenderBatch> m_Batches;
+    };
     struct Renderer {
         public:
             SDL_Window* m_Window;

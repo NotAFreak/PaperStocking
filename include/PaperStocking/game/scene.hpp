@@ -16,6 +16,7 @@ namespace PaperStocking {
 				std::lock_guard lock(m_Systems_mutex);
 				std::shared_ptr<T> newSystem = std::make_shared<T>();
 				m_Systems.push_back(newSystem);
+				newSystem->Load();
 				return std::weak_ptr<T>(newSystem);
 			}
 

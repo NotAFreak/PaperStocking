@@ -43,14 +43,17 @@ void UiManager::Initialize() {
 }
 
 void UiManager::Shutdown() {
+	m_Documents.clear();
 	Rml::RemoveContext("main");
 }
 
 void UiManager::Update() {
+	std::lock_guard lock(s_Instance->m_Ui_mutex);
 	m_Context->Update();
 }
 
 void UiManager::Render() {
+	std::lock_guard lock(s_Instance->m_Ui_mutex);
 	m_Context->Render();
 }
 
@@ -63,4 +66,26 @@ void UiManager::EventListener(SDL_Event& event) {
 		}
 	}
 	RmlSDL::InputEventHandler(s_Instance->m_Context, Renderer::s_Window, event);
+}
+
+std::weak_ptr<UiDocument> UiManager::LoadDocument(std::string name) {
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_Ui_mutex);
+	std::shared_ptr<UiDocument> doc = std::make_shared<UiDocument>(s_Instance->m_Context, name);
+	s_Instance->m_Documents.emplace(name, doc);
+	return std::weak_ptr<UiDocument>(doc);
+}
+
+void UiManager::UnloadDocument(std::string name) {
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_Ui_mutex);
+	std::map<std::string, std::shared_ptr<UiDocument>>::iterator it = s_Instance->m_Documents.find(name);
+	s_Instance->m_Documents.erase(it);
+}
+
+void UiManager::UnloadDocument(std::weak_ptr<UiDocument> doc) {
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_Ui_mutex);
+	std::map<std::string, std::shared_ptr<UiDocument>>::iterator it = s_Instance->m_Documents.find(doc.lock()->m_Name);
+	s_Instance->m_Documents.erase(it);
 }

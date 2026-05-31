@@ -32,7 +32,7 @@ namespace PaperStocking {
 				throw std::runtime_error("Couldn't find scene system to erase!");
 			}
 		private:
-			std::vector<std::unique_ptr<BaseSceneSystem>> m_Systems;
+			std::vector<std::shared_ptr<BaseSceneSystem>> m_Systems;
 			std::mutex m_Systems_mutex;
 	};
 }

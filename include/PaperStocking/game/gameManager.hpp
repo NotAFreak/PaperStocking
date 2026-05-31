@@ -10,7 +10,7 @@
 #endif
 namespace PaperStocking {
 	struct Scene;
-	struct BaseSystem;
+	class BaseSystem;
 	struct GameManager {
 		public:
 			GameManager();

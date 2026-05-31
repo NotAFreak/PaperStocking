@@ -49,7 +49,6 @@ namespace PaperStocking {
 				while (m_InitializedThreads < c_RequiredThreadCount) { }
 				logger.Begin();
 				GameManager gameManager;
-				GameManager::LoadScene();
 				GameManager::AddSystem<EntrySystem>();
 				while (s_Run) {
 					gameManager.Update();

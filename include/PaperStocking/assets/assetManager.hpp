@@ -8,6 +8,7 @@
 #define ASSETS_FOLDER_NAME_CSTR "Assets"
 #define ASSETS_FOLDER_NAME std::string(ASSETS_FOLDER_NAME_CSTR)
 #endif
+
 namespace PaperStocking {
     struct AssetManager {
         public:

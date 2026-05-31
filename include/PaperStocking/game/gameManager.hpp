@@ -35,6 +35,7 @@ namespace PaperStocking {
 				std::lock_guard lock(s_Instance->systems_mutex);
 				std::shared_ptr<T> sys = std::make_shared<T>();
 				s_Instance->systems.push_back(sys);
+				sys->Load();
 				return std::weak_ptr<T>(sys);
 			}
 

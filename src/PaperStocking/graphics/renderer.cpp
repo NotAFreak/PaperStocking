@@ -105,6 +105,7 @@ void Renderer::Render() {
     ImGui::NewFrame();
 
     m_UiManager.Update();
+    UiManager::ExecuteAllEvents(UiExecThread::Render);
 
     Timer::Begin("Upload Frame Data");
     UploadFrameData();

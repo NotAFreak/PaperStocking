@@ -24,12 +24,17 @@ namespace PaperStocking {
 			static void ReloadAllDocuments();
 			static void ReloadDocument(std::string name);
 			static void ReloadDocument(std::weak_ptr<UiDocument> doc);
+
+			static void QueueEvent(UiExecThread thread, UiEventCall call);
+			static void ExecuteAllEvents(UiExecThread thread);
 		private:
 			static inline UiManager* s_Instance;
 
 			Rml::Context* m_Context;
 			bool m_UiDebugVisible = false;
 			std::map<std::string, std::shared_ptr<UiDocument>> m_Documents;
+			std::map<UiExecThread, std::vector<UiEventCall>> m_UiEvents;
+			std::mutex m_UiEvents_mutex;
 			std::mutex m_Ui_mutex;
 
 			static void EventListener(SDL_Event& event);

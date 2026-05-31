@@ -89,3 +89,21 @@ void UiManager::UnloadDocument(std::weak_ptr<UiDocument> doc) {
 	std::map<std::string, std::shared_ptr<UiDocument>>::iterator it = s_Instance->m_Documents.find(doc.lock()->m_Name);
 	s_Instance->m_Documents.erase(it);
 }
+
+void UiManager::QueueEvent(UiExecThread thread, UiEventCall call) {
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_UiEvents_mutex);
+	if (!s_Instance->m_UiEvents.contains(thread)) {
+		s_Instance->m_UiEvents.emplace(thread, std::vector<UiEventCall>());
+	}
+	s_Instance->m_UiEvents[thread].push_back(call);
+}
+
+void UiManager::ExecuteAllEvents(UiExecThread thread) {
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_UiEvents_mutex);
+	for (auto& ventData : s_Instance->m_UiEvents[thread]) {
+		ventData.m_Callback(ventData.event);
+	}
+	s_Instance->m_UiEvents[thread].clear();
+}

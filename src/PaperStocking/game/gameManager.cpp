@@ -1,5 +1,6 @@
 #include <PaperStocking/game/scene.hpp>
 #include <PaperStocking/game/system.hpp>
+#include <PaperStocking/ui/uiManager.hpp>
 #include <PaperStocking/game/gameManager.hpp>
 
 using namespace PaperStocking;
@@ -20,6 +21,7 @@ GameManager::~GameManager() {
 
 void GameManager::Update() {
 	assert(s_Instance != nullptr);
+	UiManager::ExecuteAllEvents(UiExecThread::Game);
 	{
 		std::lock_guard lock(s_Instance->systems_mutex);
 		for(const std::shared_ptr<BaseSystem>& sys : s_Instance->systems) {

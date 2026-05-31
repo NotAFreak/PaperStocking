@@ -12,10 +12,10 @@ set(BUILD_SHARED_LIBS OFF)
 
 # Create the library
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/*.c*
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.c*
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*
 )
 add_library(${PROJECT_NAME} SHARED ${ENGINE_SOURCES}
         include/PaperStocking/debug/debugTool.hpp)
@@ -36,17 +36,17 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
 add_library(rmlui_backend_SDL_GL3 INTERFACE)
 target_sources(rmlui_backend_SDL_GL3 INTERFACE
-        ${RMLUI_BACKEND_PATH}/RmlUi_Platform_SDL.cpp
-        ${RMLUI_BACKEND_PATH}/RmlUi_Renderer_GL3.cpp
+    ${RMLUI_BACKEND_PATH}/RmlUi_Platform_SDL.cpp
+    ${RMLUI_BACKEND_PATH}/RmlUi_Renderer_GL3.cpp
 )
 target_include_directories(rmlui_backend_SDL_GL3 INTERFACE ${RMLUI_BACKEND_PATH})
 target_compile_definitions(rmlui_backend_SDL_GL3 INTERFACE
-        RMLUI_SDL_VERSION_MAJOR=3
-        RMLUI_NUM_MSAA_SAMPLES=16
-        RMLUI_GL3_CUSTOM_LOADER=<glad/gl.h>
+    RMLUI_SDL_VERSION_MAJOR=3
+    RMLUI_NUM_MSAA_SAMPLES=16
+    RMLUI_GL3_CUSTOM_LOADER=<glad/gl.h>
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        rmlui_backend_SDL_GL3
+    rmlui_backend_SDL_GL3
 )
 
 # link

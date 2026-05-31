@@ -5,6 +5,7 @@
 #include <PaperStocking/ui/uiManager.hpp>
 
 #include <RmlUi_Backend.h>
+#include <PaperStocking/debug/timer.hpp>
 #include <PaperStocking/input/rawInput.hpp>
 #include <RmlUi/Debugger/Debugger.h>
 

@@ -13,8 +13,9 @@ namespace PaperStocking {
 
 			template <class T = BaseSceneSystem>
 			std::weak_ptr<T> AddSystem() {
-				std::lock_guard lock(m_Systems_mutex);
+				std::lock_guard lock( m_Systems_mutex);
 				std::shared_ptr<T> newSystem = std::make_shared<T>();
+				newSystem->m_Scene = this;
 				m_Systems.push_back(newSystem);
 				newSystem->Load();
 				return std::weak_ptr<T>(newSystem);

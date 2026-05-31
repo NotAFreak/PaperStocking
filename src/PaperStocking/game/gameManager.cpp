@@ -46,5 +46,13 @@ std::weak_ptr<Scene> GameManager::LoadScene() {
 }
 
 void GameManager::UnloadScene(std::weak_ptr<Scene> scene) {
-
+	assert(s_Instance != nullptr);
+	std::lock_guard lock(s_Instance->m_Scenes_mutex);
+	std::vector<std::shared_ptr<Scene>>::iterator it;
+	std::shared_ptr<Scene> sceneLock = scene.lock();
+	for (it = s_Instance->m_Scenes.begin(); it != s_Instance->m_Scenes.end(); ++it) {
+		if (it->get() == sceneLock.get()) break;
+	}
+	assert(it != s_Instance->m_Scenes.end());
+	s_Instance->m_Scenes.erase(it);
 }

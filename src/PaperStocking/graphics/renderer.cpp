@@ -99,19 +99,25 @@ Renderer::~Renderer() {
 }
 
 void Renderer::Render() {
+    Timer::Begin("Begin Frame");
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
     m_UiManager.Update();
+    Timer::Begin("Execute UI Events");
     UiManager::ExecuteAllEvents(UiExecThread::Render);
+    Timer::End();
 
     Timer::Begin("Upload Frame Data");
     UploadFrameData();
     Timer::End();
+    Timer::End();
 
     // Actual Render
+    Timer::Begin("Render Frame");
+
     Timer::Begin("UI");
     m_UiRenderInterface->BeginFrame();
     m_UiManager.Render();
@@ -121,10 +127,13 @@ void Renderer::Render() {
     Timer::Begin("Debug UI");
     m_DebugUi->Render();
     Timer::End();
+    Timer::End();
 
+    Timer::Begin("End Frame");
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(s_Window);
+    Timer::End();
 }
 
 // GPU Calls

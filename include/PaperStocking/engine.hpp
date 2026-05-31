@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <tclap/CmdLine.h>
 #include <PaperStocking/logger.hpp>
+#include <PaperStocking/thread/threads.hpp>
+#include <PaperStocking/game/gameManager.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
 namespace PaperStocking {
 	struct EngineStartInfo {
@@ -29,14 +31,31 @@ namespace PaperStocking {
 					logger.Error("Error parsing args: " + std::string(ex.what()));
 				}
 				logger.Info("Starting engine, version " + c_Version);
-				std::thread gameThread(GameThread);
+				std::thread gameThread(GameThread<EntrySystem>);
 				RenderThread();
 				gameThread.join();
 				logger.Info("Stopped engine!");
 			}
 		private:
 			static void RenderThread();
-			static void GameThread();
+
+			template<typename EntrySystem>
+			static void GameThread() {
+				Threads::SetThread(ThreadInfo{
+					"Game",1
+				});
+				NestedLogger logger = NestedLogger("Game Manager");
+				++m_InitializedThreads;
+				while (m_InitializedThreads < c_RequiredThreadCount) { }
+				logger.Begin();
+				GameManager gameManager;
+				GameManager::LoadScene();
+				GameManager::AddSystem<EntrySystem>();
+				while (s_Run) {
+					gameManager.Update();
+				}
+				logger.End();
+			}
 
 			static void EventListener(SDL_Event& event);
 

@@ -6,7 +6,11 @@ namespace PaperStocking {
 	struct Scene final {
 		public:
 			entt::registry registry;
+			Scene() = default;
+			~Scene() = default;
+			void Update();
 		private:
-			std::vector<std::unique_ptr<BaseSceneSystem>> systems;
+			std::vector<std::unique_ptr<BaseSceneSystem>> m_Systems;
+			std::mutex m_Systems_mutex;
 	};
 }

@@ -19,11 +19,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 
 # Libraries
 find_package(Freetype REQUIRED)
+find_package(SQLite3 REQUIRED)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/tclap)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glad)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/SDL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/SDL_image)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/RmlUi)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 
 # link
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -34,6 +37,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     RmlUi::RmlUi
     RmlUi::Debugger
     Freetype::Freetype
+    EnTT::EnTT
+    SQLite::SQLite3
 )
 
 # Link RmlUi backend

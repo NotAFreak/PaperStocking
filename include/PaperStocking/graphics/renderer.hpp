@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <PaperStocking/logger.hpp>
+#include <PaperStocking/graphics/camera.hpp>
 #include <PaperStocking/debug/debugUiManager.hpp>
 
 namespace PaperStocking {
@@ -21,8 +22,14 @@ namespace PaperStocking {
     struct RenderData {
         std::vector<RenderBatch> m_Batches;
     };
+    struct CamData {
+        glm::mat4 camMat;
+        glm::vec3 camPos;
+        glm::vec2 screenSize;
+    };
     struct Renderer {
         public:
+            Camera camera;
             SDL_Window* m_Window;
             SDL_GLContext m_GlContext;
 
@@ -59,5 +66,15 @@ namespace PaperStocking {
                 // Depth buffer
                 GPU_LOC depth;
             } m_GBuffer;
+
+            struct SpriteMeshGPUData {
+                uint VAO = 0;
+                uint EBO = 0;
+            };
+
+            //  UBOs
+            GPU_LOC camDataUBO;
+
+            static void UploadFrameData();
     };
 }

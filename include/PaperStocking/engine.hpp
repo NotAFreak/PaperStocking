@@ -2,16 +2,38 @@
 #include <string>
 #include <atomic>
 #include <SDL3/SDL.h>
+#include <tclap/CmdLine.h>
+#include <PaperStocking/logger.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
 namespace PaperStocking {
+	struct EngineStartInfo {
+		std::string m_ApplicationName;
+		std::string m_ApplicationVersion;
+	};
 	struct Engine {
 		public:
 			const static inline std::string c_Version = "1.0.0";
 			static inline std::atomic_bool s_Run = true;
+			static inline EngineStartInfo info;
 
 			Engine() = default;
 			~Engine() = default;
-			void Run(int argc, char* argv[]);
+			template <typename EntrySystem>
+			void Run(int argc, char* argv[], EngineStartInfo& info) {
+				PaperStocking::Logger logger("PaperStocking", LogColour::Blue);
+				this->info = info;
+				try {
+					TCLAP::CmdLine cmd("This is a PaperStocking game", ' ', c_Version);
+					cmd.parse(argc, argv);
+				} catch (TCLAP::ArgException& ex) {
+					logger.Error("Error parsing args: " + std::string(ex.what()));
+				}
+				logger.Info("Starting engine, version " + c_Version);
+				std::thread gameThread(GameThread);
+				RenderThread();
+				gameThread.join();
+				logger.Info("Stopped engine!");
+			}
 		private:
 			static void RenderThread();
 			static void GameThread();

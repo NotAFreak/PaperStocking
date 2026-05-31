@@ -3,9 +3,13 @@
 #include <glad/gl.h>
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
+#include <RmlUi_Renderer_GL3.h>
+#include <RmlUi_Platform_SDL.h>
+
 #include <PaperStocking/logger.hpp>
 #include <PaperStocking/graphics/camera.hpp>
 #include <PaperStocking/debug/debugUiManager.hpp>
+#include <PaperStocking/ui/uiManager.hpp>
 
 namespace PaperStocking {
     using GPU_LOC = GLuint;
@@ -29,8 +33,9 @@ namespace PaperStocking {
     };
     struct Renderer {
         public:
+            static inline SDL_Window* s_Window;
+
             Camera camera;
-            SDL_Window* m_Window;
             SDL_GLContext m_GlContext;
 
             Renderer();
@@ -43,8 +48,15 @@ namespace PaperStocking {
 
             static void SetOutputResolution(glm::uvec2 resolution, bool setWindow = true);
             static void SetRenderScale(float scale);
+
+            static glm::uvec2 GetOutputResolution();
+            static glm::uvec2 GetRenderResolution();
+            static float GetRenderScale();
         private:
             static inline Renderer* s_Instance;
+            UiManager m_UiManager;
+            RenderInterface_GL3* m_UiRenderInterface;
+            SystemInterface_SDL* m_UiSystemInterface;
             Logger m_Logger = Logger("Renderer", LogColour::Blue);
             glm::vec4 m_ClearColor = glm::vec4(0.8f, 0.5f, 0.7f, 0.8f);
             std::unique_ptr<DebugUiManager> m_DebugUi;
@@ -76,5 +88,7 @@ namespace PaperStocking {
             GPU_LOC camDataUBO;
 
             static void UploadFrameData();
+
+            static void EventListener(SDL_Event& event);
     };
 }

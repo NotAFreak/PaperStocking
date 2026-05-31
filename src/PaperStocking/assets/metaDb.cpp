@@ -19,7 +19,7 @@ MetaDatabase::MetaDatabase(const std::string &dbLocation) {
 MetaDatabase::~MetaDatabase() {
 	assert(s_Instance != nullptr);
 	std::lock_guard lock(this->m_CommandMutex);
-	assert(db != nullptr);
+	assert(m_Db != nullptr);
 	sqlite3_close_v2(m_Db);
 	sqlite3_finalize(m_MetadataCmd);
 	sqlite3_finalize(m_TextureCmd);
@@ -53,13 +53,13 @@ void MetaDatabase::PrepareStatements() {
 
 void MetaDatabase::LoadToMemory() {
 	assert(s_Instance != nullptr);
-	assert(db != nullptr);
+	assert(s_Instance->m_Db != nullptr);
 	std::lock_guard lock(s_Instance->m_CommandMutex);
 	LoadToMemoryNoLock();
 }
 
 void MetaDatabase::UnloadFromMemory() {
-	assert(db != nullptr);
+	assert(s_Instance->m_Db != nullptr);
 	assert(s_Instance != nullptr);
 	std::lock_guard lock(s_Instance->m_CommandMutex);
 	UnloadFromMemoryNoLock();

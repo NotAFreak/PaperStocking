@@ -5,6 +5,7 @@ project(PaperStocking VERSION 0.1.0 LANGUAGES C CXX)
 # Set options
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(RMLUI_BACKEND SDL_GL3)
 
 # Create the library
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
@@ -28,20 +29,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/SDL_image)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/RmlUi)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 
-# link
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    TCLAP
-    GLAD
-    SDL3::SDL3
-    SDL3_image::SDL3_image
-    RmlUi::RmlUi
-    RmlUi::Debugger
-    Freetype::Freetype
-    EnTT::EnTT
-    SQLite::SQLite3
-)
-
-# Link RmlUi backend
+# Create RmlUi backend
 set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
 add_library(rmlui_backend_SDL_GL3 INTERFACE)
 target_sources(rmlui_backend_SDL_GL3 INTERFACE
@@ -56,4 +44,18 @@ target_compile_definitions(rmlui_backend_SDL_GL3 INTERFACE
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
         rmlui_backend_SDL_GL3
+)
+
+# link
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    TCLAP
+    GLAD
+    SDL3::SDL3
+    SDL3_image::SDL3_image
+    RmlUi::RmlUi
+    RmlUi::Debugger
+    Freetype::Freetype
+    EnTT::EnTT
+    SQLite::SQLite3
+    rmlui_backend_SDL_GL3
 )

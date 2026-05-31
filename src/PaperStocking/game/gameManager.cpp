@@ -5,12 +5,12 @@
 using namespace PaperStocking;
 
 GameManager::GameManager() {
-	assert(instance == nullptr);
+	assert(s_Instance == nullptr);
 	s_Instance = this;
 }
 
 GameManager::~GameManager() {
-	assert(instance != nullptr);
+	assert(s_Instance != nullptr);
 	std::lock_guard sysLock(systems_mutex);
 	systems.clear();
 	std::lock_guard sceneLock(m_Scenes_mutex);
@@ -19,7 +19,7 @@ GameManager::~GameManager() {
 }
 
 void GameManager::Update() {
-	assert(instance != nullptr);
+	assert(s_Instance != nullptr);
 	{
 		std::lock_guard lock(s_Instance->systems_mutex);
 		for(const std::shared_ptr<BaseSystem>& sys : s_Instance->systems) {

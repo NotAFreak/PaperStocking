@@ -42,7 +42,7 @@ target_sources(rmlui_backend_SDL_GL3 INTERFACE
 target_include_directories(rmlui_backend_SDL_GL3 INTERFACE ${RMLUI_BACKEND_PATH})
 target_compile_definitions(rmlui_backend_SDL_GL3 INTERFACE
         RMLUI_SDL_VERSION_MAJOR=3
-        RMLUI_NUM_MSAA_SAMPLES=4
+        RMLUI_NUM_MSAA_SAMPLES=16
         RMLUI_GL3_CUSTOM_LOADER=<glad/gl.h>
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC

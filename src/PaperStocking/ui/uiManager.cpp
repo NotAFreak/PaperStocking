@@ -97,6 +97,10 @@ void UiManager::QueueEvent(UiExecThread thread, UiEventCall call) {
 	if (!s_Instance->m_UiEvents.contains(thread)) {
 		s_Instance->m_UiEvents.emplace(thread, std::vector<UiEventCall>());
 	}
+	// cull the duplicated events
+	for (auto& event : s_Instance->m_UiEvents[thread]) {
+		if (event.event == call.event) return;
+	}
 	s_Instance->m_UiEvents[thread].push_back(call);
 }
 

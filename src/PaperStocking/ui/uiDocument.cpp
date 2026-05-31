@@ -6,6 +6,8 @@
 using namespace PaperStocking;
 
 void UiEventListener::ProcessEvent(Rml::Event& event) {
+	// prvent event spam
+	if (event.GetPhase() != Rml::EventPhase::Target) return;
 	UiManager::QueueEvent(m_Callback.m_ExecThread, UiEventCall(m_Callback.m_Callback, &event));
 }
 

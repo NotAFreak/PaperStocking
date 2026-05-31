@@ -5,7 +5,7 @@
 
 using namespace PaperStocking;
 
-void UiEventListner::ProcessEvent(Rml::Event& event) {
+void UiEventListener::ProcessEvent(Rml::Event& event) {
 	UiManager::QueueEvent(m_Callback.m_ExecThread, UiEventCall(m_Callback.m_Callback, &event));
 }
 
@@ -36,6 +36,6 @@ void UiDocument::RegisterEvent(std::string name, std::function<void(Rml::Event*)
 		if (!eventName) continue;
 		auto it = m_EventCallbacks.find(eventName->Get<Rml::String>());
 		if (it == m_EventCallbacks.end()) continue;
-		element->AddEventListener("click", new UiEventListner(it->second));
+		element->AddEventListener("click", new UiEventListener(it->second));
 	}
 }

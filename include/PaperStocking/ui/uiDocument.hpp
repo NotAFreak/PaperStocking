@@ -24,9 +24,9 @@ namespace PaperStocking {
 			}
 			~UiEventCall() = default;
 	};
-	class UiEventListner : public Rml::EventListener {
+	class UiEventListener : public Rml::EventListener {
 		public:
-			UiEventListner(const UiEventData& callback) {
+			UiEventListener(const UiEventData& callback) {
 				this->m_Callback = callback;
 			}
 			void ProcessEvent(Rml::Event& event);

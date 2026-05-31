@@ -106,4 +106,6 @@ void UiManager::ExecuteAllEvents(UiExecThread thread) {
 		ventData.m_Callback(ventData.event);
 	}
 	s_Instance->m_UiEvents[thread].clear();
+	// prevent weird memory shite
+	s_Instance->m_UiEvents[thread].shrink_to_fit();
 }

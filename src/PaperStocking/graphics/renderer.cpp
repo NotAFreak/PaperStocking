@@ -50,12 +50,12 @@ Renderer::Renderer() {
     glClearColor(m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, m_ClearColor.a);
 
     // Camera data
-    glGenBuffers(1, &camDataUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, camDataUBO);
+    glGenBuffers(1, &m_CamDataUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_CamDataUBO);
     size_t totalSize = sizeof(glm::mat4) + sizeof(glm::vec3) + sizeof(glm::vec2);
     glBufferData(GL_UNIFORM_BUFFER,totalSize,nullptr,GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, camDataUBO);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_CamDataUBO);
 
     // ImGui
     IMGUI_CHECKVERSION();
@@ -79,6 +79,39 @@ Renderer::Renderer() {
     m_DebugUi = std::make_unique<DebugUiManager>();
 
     RawInput::SubscribeListener(EventListener);
+
+    ShaderManager::CompileAllModules();
+    ShaderManager::CompileAllPrograms();
+
+    // Create quad
+    {
+        SpriteMeshGPUData gpuData;
+        float vertices[] = {
+            // Positions            // TexCoords (UV)
+            -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, // Bottom Left
+            -1.0f,  1.0f, 0.0f,     0.0f, 1.0f, // Top Left
+             1.0f, -1.0f, 0.0f,     1.0f, 0.0f, // Bottom Right
+
+            -1.0f,  1.0f, 0.0f,     0.0f, 1.0f, // Top Left
+             1.0f,  1.0f, 0.0f,     1.0f, 1.0f, // Top Right
+             1.0f, -1.0f, 0.0f,     1.0f, 0.0f  // Bottom Right
+        };
+        glGenVertexArrays(1, &gpuData.m_VAO);
+        glGenBuffers(1, &gpuData.m_VBO);
+
+        glBindVertexArray(gpuData.m_VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, gpuData.m_VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        unsigned int stride = 5 * sizeof(float);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, stride, (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 Renderer::~Renderer() {
@@ -110,6 +143,27 @@ void Renderer::Render() {
     UiManager::ExecuteAllEvents(UiExecThread::Render);
     Timer::End();
 
+    Timer::Begin("Unload textures");
+    {
+        std::lock_guard lock(m_TextureUnloadQueue_mutex);
+        while(!m_TextureUnloadQueue.empty()) {
+            std::shared_ptr<Texture> texture = m_TextureUnloadQueue.front();
+            texture->Unload();
+            m_TextureUnloadQueue.pop();
+        }
+    }
+    Timer::End();
+    Timer::Begin("Upload textures");
+    {
+        std::lock_guard lock(m_TextureUploadQueue_mutex);
+        while(!m_TextureUploadQueue.empty()) {
+            std::shared_ptr<Texture> texture = m_TextureUploadQueue.front();
+            texture->Unload();
+            m_TextureUploadQueue.pop();
+        }
+    }
+    Timer::End();
+
     Timer::Begin("Upload Frame Data");
     UploadFrameData();
     Timer::End();
@@ -117,6 +171,14 @@ void Renderer::Render() {
 
     // Actual Render
     Timer::Begin("Render Frame");
+    Timer::Begin("Sprites");
+    {
+        std::lock_guard lock(s_Instance->m_Sprites_mutex);
+        for (auto& sprite : m_Sprites) {
+            sprite->Render();
+        }
+    }
+    Timer::End();
 
     Timer::Begin("UI");
     m_UiRenderInterface->BeginFrame();
@@ -190,12 +252,40 @@ void Renderer::UploadFrameData() {
         glm::vec3 camPos = s_Instance->camera.transform.GetGlobalPosition();
         glm::vec2 screenSize = s_Instance->m_RenderResolution;
 
-        glBindBuffer(GL_UNIFORM_BUFFER, s_Instance->camDataUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, s_Instance->m_CamDataUBO);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camMat));
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(camPos));
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(glm::vec2), glm::value_ptr(screenSize));
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
+}
+
+void Renderer::QueueTextureUpload(std::shared_ptr<Texture> texture) {
+    assert(s_Instance != nullptr);
+    std::lock_guard lock(s_Instance->m_TextureUploadQueue_mutex);
+    s_Instance->m_TextureUploadQueue.push(texture);
+}
+void Renderer::QueueTextureUnload(std::shared_ptr<Texture> texture) {
+    assert(s_Instance != nullptr);
+    std::lock_guard lock(s_Instance->m_TextureUnloadQueue_mutex);
+    s_Instance->m_TextureUnloadQueue.push(texture);
+}
+
+void Renderer::RegisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite) {
+    assert(s_Instance != nullptr);
+    std::lock_guard lock(s_Instance->m_Sprites_mutex);
+    s_Instance->m_Sprites.push_back(sprite);
+}
+
+void Renderer::UnregisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite) {
+    assert(s_Instance != nullptr);
+    std::lock_guard lock(s_Instance->m_Sprites_mutex);
+    std::vector<std::shared_ptr<SpriteRenderable>>::iterator it;
+    for (it = s_Instance->m_Sprites.begin(); it != s_Instance->m_Sprites.end(); ++it) {
+        if (it->get() == sprite.get()) break;
+    }
+    assert(it != s_Instance->m_Sprites.end());
+    s_Instance->m_Sprites.erase(it);
 }
 
 void Renderer::EventListener(SDL_Event& event) {

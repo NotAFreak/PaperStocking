@@ -13,9 +13,10 @@ AssetManager::~AssetManager() {
 }
 
 std::shared_ptr<Texture> AssetManager::LoadTexture(TextureLoadRequest request) {
-	return std::make_shared<Texture>();
+	return std::make_shared<Texture>(request.m_AssetPath);
 }
 
 void AssetManager::LoadTextureAsync(TextureLoadRequest request) {
-
+	std::shared_ptr<Texture> texture = std::make_shared<Texture>(request.m_AssetPath);
+	request.OnFinishLoad(texture);
 }

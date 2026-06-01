@@ -8,8 +8,7 @@ namespace PaperStocking {
 	template <typename AssetType>
 	class BaseAssetLoadRequest {
 		public:
-			bool cache = true;
-			std::filesystem::path assetPath;
+			std::filesystem::path m_AssetPath;
 			void(*OnFinishLoad)(std::shared_ptr<AssetType>);
 	};
 

@@ -7,9 +7,13 @@
 #include <RmlUi_Platform_SDL.h>
 
 #include <PaperStocking/logger.hpp>
+#include <PaperStocking/graphics/renderable/spriteRenderable.hpp>
+#include <PaperStocking/ui/uiManager.hpp>
 #include <PaperStocking/graphics/camera.hpp>
 #include <PaperStocking/debug/debugUiManager.hpp>
-#include <PaperStocking/ui/uiManager.hpp>
+#include <PaperStocking/graphics/materialManager.hpp>
+
+#include <PaperStocking/graphics/shader/shaderManager.hpp>
 
 namespace PaperStocking {
     using GPU_LOC = GLuint;
@@ -33,8 +37,18 @@ namespace PaperStocking {
     };
     struct Renderer {
         public:
-            static inline SDL_Window* s_Window;
+            struct SpriteVertex {
+                glm::vec3 pos;
+                glm::vec2 uv;
+            };
+            struct SpriteMeshGPUData {
+                uint m_VAO = 0;
+                uint m_VBO = 0;
+                uint m_EBO = 0;
+            };
+            static inline SpriteMeshGPUData m_QuadData = {0, 0, 0};
 
+            static inline SDL_Window* s_Window;
             Camera camera;
             SDL_GLContext m_GlContext;
 
@@ -52,14 +66,23 @@ namespace PaperStocking {
             static glm::uvec2 GetOutputResolution();
             static glm::uvec2 GetRenderResolution();
             static float GetRenderScale();
+
+            static void QueueTextureUpload(std::shared_ptr<Texture> texture);
+            static void QueueTextureUnload(std::shared_ptr<Texture> texture);
+
+            static void RegisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite);
+            static void UnregisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite);
         private:
             static inline Renderer* s_Instance;
+            std::unique_ptr<DebugUiManager> m_DebugUi;
+
             UiManager m_UiManager;
+            MaterialManager m_MaterialManager;
+            ShaderManager m_ShaderManager;
             RenderInterface_GL3* m_UiRenderInterface;
             SystemInterface_SDL* m_UiSystemInterface;
             Logger m_Logger = Logger("Renderer", LogColour::Blue);
             glm::vec4 m_ClearColor = glm::vec4(0.8f, 0.5f, 0.7f, 0.8f);
-            std::unique_ptr<DebugUiManager> m_DebugUi;
 
             glm::uvec2 m_RenderResolution = {1280, 720};
             float m_RenderScale = 1.0f;
@@ -79,16 +102,20 @@ namespace PaperStocking {
                 GPU_LOC depth;
             } m_GBuffer;
 
-            struct SpriteMeshGPUData {
-                uint VAO = 0;
-                uint EBO = 0;
-            };
-
             //  UBOs
-            GPU_LOC camDataUBO;
+            GPU_LOC m_CamDataUBO;
+
+
+            // Actual render data
+            std::vector<std::shared_ptr<SpriteRenderable>> m_Sprites;
+            std::mutex m_Sprites_mutex;
+
+            std::queue<std::shared_ptr<Texture>> m_TextureUploadQueue;
+            std::mutex m_TextureUploadQueue_mutex;
+            std::queue<std::shared_ptr<Texture>> m_TextureUnloadQueue;
+            std::mutex m_TextureUnloadQueue_mutex;
 
             static void UploadFrameData();
-
             static void EventListener(SDL_Event& event);
     };
 }

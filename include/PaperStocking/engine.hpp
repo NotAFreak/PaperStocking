@@ -6,7 +6,9 @@
 #include <PaperStocking/logger.hpp>
 #include <PaperStocking/thread/threads.hpp>
 #include <PaperStocking/game/gameManager.hpp>
+#include <PaperStocking/assets/assetManager.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
+
 namespace PaperStocking {
 	struct EngineStartInfo {
 		std::string m_ApplicationName;
@@ -59,6 +61,7 @@ namespace PaperStocking {
 			static void EventListener(SDL_Event& event);
 
 			SettingsManager m_SettingsManager;
+			AssetManager m_AssetManager;
 			static inline std::atomic_uint8_t m_InitializedThreads = 0;
 			static constexpr uint8_t c_RequiredThreadCount = 2;
 	};

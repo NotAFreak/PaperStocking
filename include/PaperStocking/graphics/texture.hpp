@@ -36,14 +36,49 @@ namespace PaperStocking {
 	};
 	struct Texture {
 		public:
-			static std::shared_ptr<Texture> LoadTexture(std::istream in);
-			static std::shared_ptr<Texture> LoadTexture(std::filesystem::path filePath);
-		private:
-			uint16_t width = 64;
-			uint16_t height = 64;
+			Texture() = default;
+			Texture(std::filesystem::path filePath);
+
+			~Texture();
+			bool IsUploaded() const {
+				return m_Uploaded;
+			}
+
+			// Only on render thread
+			void Upload();
+			// Only on render thread
+			void Unload();
+
+			// Only on render thread
+			void Update();
+			// Only on render thread
+			void UpdateSafe();
+
+			uint32_t GetHandle() const {
+				return m_Handle;
+			}
+			uint8_t* GetPixels() const {
+				return m_Pixels;
+			}
+			uint16_t GetWidth() const {
+				return m_Width;
+			}
+			uint16_t GetHeight() const {
+				return m_Height;
+			}
+
+			std::string m_Location;
 			TextureWrap m_Wrap = TextureWrap::CLAMP_EDGE;
 			TextureFilter m_MinFilter = TextureFilter::POINT;
 			TextureFilter m_MagFilter = TextureFilter::POINT;
 			TextureFormat m_Format = TextureFormat::RGB8;
+			bool m_EnableMipmaps = false;
+		private:
+			uint32_t m_Handle = 0x0;
+			bool m_Uploaded = false;
+
+			uint16_t m_Width = 64;
+			uint16_t m_Height = 64;
+			uint8_t* m_Pixels = nullptr;
 	};
 }

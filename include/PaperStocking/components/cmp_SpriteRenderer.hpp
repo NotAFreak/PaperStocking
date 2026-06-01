@@ -3,8 +3,8 @@
 namespace PaperStocking::Components {
 	struct cmp_SpriteRenderer {
 		public:
-			std::unique_ptr<SpriteRenderable> m_Sprite;
+			std::shared_ptr<SpriteRenderable> m_Sprite;
 			cmp_SpriteRenderer(std::string materialName);
-			~cmp_SpriteRenderer() = default;
+			~cmp_SpriteRenderer();
 	};
 }

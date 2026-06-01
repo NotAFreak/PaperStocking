@@ -52,8 +52,7 @@ Renderer::Renderer() {
     // Camera data
     glGenBuffers(1, &m_CamDataUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, m_CamDataUBO);
-    size_t totalSize = sizeof(glm::mat4) + sizeof(glm::vec3) + sizeof(glm::vec2);
-    glBufferData(GL_UNIFORM_BUFFER,totalSize,nullptr,GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(m_CamData),nullptr,GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_CamDataUBO);
 
@@ -83,6 +82,74 @@ Renderer::Renderer() {
     ShaderManager::CompileAllModules();
     ShaderManager::CompileAllPrograms();
 
+    // Create GBuffer
+    {
+        // Create GBuffer
+        glGenFramebuffers(1, &m_GBuffer.frameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.frameBuffer);
+
+        glGenTextures(1, &m_GBuffer.position);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.position);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.position, 0);
+
+        glGenTextures(1, &m_GBuffer.norm);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.norm);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.norm, 0);
+
+        glGenTextures(1, &m_GBuffer.color);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.color);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.color, 0);
+
+        glGenTextures(1, &m_GBuffer.lighting);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.lighting);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_GBuffer.lighting, 0);
+
+        glGenRenderbuffers(1, &m_GBuffer.depth);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_GBuffer.depth);
+        glRenderbufferStorage(
+            GL_RENDERBUFFER,
+            GL_DEPTH_COMPONENT24,
+            m_RenderResolution.x,
+            m_RenderResolution.y
+        );
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_GBuffer.depth);
+
+        // Bind regular GBuffer again
+        unsigned int attachments[4] = {
+            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
+            GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+        };
+        glDrawBuffers(4, attachments);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDepthFunc(GL_LEQUAL);
+
+        // Create Depth Frame buffer
+        glGenFramebuffers(1, &m_GBuffer.depthFrameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.depthFrameBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_GBuffer.depthFrameBuffer);
+        glRenderbufferStorage(
+            GL_RENDERBUFFER,
+            GL_DEPTH_COMPONENT24,
+            m_RenderResolution.x,
+            m_RenderResolution.y
+        );
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_GBuffer.depth);
+        glDepthFunc(GL_LEQUAL);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
     // Create quad
     {
         SpriteMeshGPUData gpuData;
@@ -111,6 +178,7 @@ Renderer::Renderer() {
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        m_QuadData = gpuData;
     }
 }
 
@@ -133,7 +201,10 @@ Renderer::~Renderer() {
 
 void Renderer::Render() {
     Timer::Begin("Begin Frame");
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.frameBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -181,6 +252,7 @@ void Renderer::Render() {
     Timer::End();
 
     Timer::Begin("UI");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     m_UiRenderInterface->BeginFrame();
     m_UiManager.Render();
     m_UiRenderInterface->EndFrame();
@@ -250,12 +322,16 @@ void Renderer::UploadFrameData() {
     {   // Upload camera data
         glm::mat4 camMat = s_Instance->camera.GetFullMatrix();
         glm::vec3 camPos = s_Instance->camera.transform.GetGlobalPosition();
-        glm::vec2 screenSize = s_Instance->m_RenderResolution;
+        glm::vec2 screenSize = {s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y};
+        s_Instance->m_CamData = {
+            camMat,
+            camPos
+        };
 
         glBindBuffer(GL_UNIFORM_BUFFER, s_Instance->m_CamDataUBO);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camMat));
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(camPos));
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(glm::vec2), glm::value_ptr(screenSize));
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(s_Instance->m_CamData), &s_Instance->m_CamData);
+        // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camMat));
+        // glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(camPos));
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 }

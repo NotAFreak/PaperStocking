@@ -82,7 +82,8 @@ namespace PaperStocking {
             RenderInterface_GL3* m_UiRenderInterface;
             SystemInterface_SDL* m_UiSystemInterface;
             Logger m_Logger = Logger("Renderer", LogColour::Blue);
-            glm::vec4 m_ClearColor = glm::vec4(0.8f, 0.5f, 0.7f, 0.8f);
+            // glm::vec4 m_ClearColor = glm::vec4(0.8f, 0.5f, 0.7f, 0.8f);
+            glm::vec4 m_ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
             glm::uvec2 m_RenderResolution = {1280, 720};
             float m_RenderScale = 1.0f;
@@ -91,6 +92,11 @@ namespace PaperStocking {
             struct GBuffer {
                 // Framebuffer for the GBuffer
                 GPU_LOC frameBuffer;
+                // Framebuffer for the depth prepass
+                GPU_LOC depthFrameBuffer;
+
+                // Buffer for color of each pixel
+                GPU_LOC color;
 
                 // Buffer for world-space position of each pixel
                 GPU_LOC position;
@@ -101,6 +107,11 @@ namespace PaperStocking {
                 // Depth buffer
                 GPU_LOC depth;
             } m_GBuffer;
+
+            struct CamData {
+                glm::mat4 camMat;
+                glm::vec3 camPos;
+            } m_CamData;
 
             //  UBOs
             GPU_LOC m_CamDataUBO;

@@ -7,5 +7,10 @@ const glm::mat4 Camera::GetProjMatrix() {
 }
 
 const glm::mat4 Camera::GetViewMatrix() {
-    return glm::lookAt(transform.GetGlobalPosition(), transform.Forward(), transform.Up());
+    glm::vec3 position = transform.GetGlobalPosition();
+    glm::vec3 forward = transform.Forward();
+    glm::vec3 up = transform.Up();
+
+    glm::vec3 center = position + forward;
+    return glm::lookAt(position, center, up);
 }

@@ -1,3 +1,4 @@
+#include <entt/entity/entity.hpp>
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -250,12 +251,38 @@ void Renderer::Render() {
         }
     }
     Timer::End();
+    Timer::Begin("Combine GBuffer");
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glUseProgram(m_GBuffer.gBufferShader->handle);
+        SetUniformI(m_GBuffer.gBufferShader->handle, "gColor", 0);
+        SetUniformI(m_GBuffer.gBufferShader->handle, "gPos", 1);
+        SetUniformI(m_GBuffer.gBufferShader->handle, "gNorm", 2);
+        SetUniformI(m_GBuffer.gBufferShader->handle, "gLighting", 3);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.color);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.position);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.norm);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.lighting);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_GBuffer.depth);
+
+        glDisable(GL_DEPTH_TEST);
+        glBindVertexArray(m_QuadData.m_VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_DEPTH_TEST);
+    }
+    Timer::End();
 
     Timer::Begin("UI");
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    m_UiRenderInterface->BeginFrame();
-    m_UiManager.Render();
-    m_UiRenderInterface->EndFrame();
+    {
+        m_UiRenderInterface->BeginFrame();
+        m_UiManager.Render();
+        m_UiRenderInterface->EndFrame();
+    }
     Timer::End();
 
     Timer::Begin("Debug UI");
@@ -264,9 +291,11 @@ void Renderer::Render() {
     Timer::End();
 
     Timer::Begin("End Frame");
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(s_Window);
+    {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SDL_GL_SwapWindow(s_Window);
+    }
     Timer::End();
 }
 
@@ -370,4 +399,83 @@ void Renderer::EventListener(SDL_Event& event) {
         SDL_GetWindowSize(s_Window, &w, &h);
         SetOutputResolution({w, h}, false);
     }
+}
+
+struct UniformWarning {
+    uint handle;
+    std::string name;
+    bool operator==(const UniformWarning& other) const {
+        return handle == other.handle && name == other.name;
+    }
+};
+std::vector<UniformWarning> warnings;
+
+bool WarningExists(uint handle, std::string name) {
+    UniformWarning warning = UniformWarning {
+        handle,
+        name
+    };
+    std::vector<UniformWarning>::iterator it;
+    for (it = warnings.begin(); it != warnings.end(); it++) {
+        if (*it == warning) {
+            return true;
+        }
+    }
+    warnings.push_back(warning);
+    return false;
+}
+
+void Renderer::SetUniformM4(uint shaderHandle, std::string name, glm::mat4 value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniformMatrix4fv(modelUniform, 1, false, &value[0][0]);
+}
+void Renderer::SetUniformV4(uint shaderHandle, const std::string& name, glm::vec4 value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniform4f(modelUniform, value[0], value[1], value[2], value[3]);
+}
+void Renderer::SetUniformV3(uint shaderHandle, std::string name, glm::vec3 value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniform3f(modelUniform, value[0], value[1], value[2]);
+}
+void Renderer::SetUniformV2(uint shaderHandle, std::string name, glm::vec2 value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniform2f(modelUniform, value[0], value[1]);
+}
+void Renderer::SetUniformF(uint shaderHandle, std::string name, float value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniform1f(modelUniform, value);
+}
+void Renderer::SetUniformI(uint shaderHandle, std::string name, int value) {
+    assert(s_Instance != nullptr);
+    int modelUniform = glGetUniformLocation(shaderHandle, name.c_str());
+    if(modelUniform == -1) {
+        if (WarningExists(shaderHandle, name)) return;
+        s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
+    }
+    glUniform1i(modelUniform, value);
 }

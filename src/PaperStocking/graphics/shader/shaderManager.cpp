@@ -206,7 +206,7 @@ void ShaderManager::CompileShaderProgram(ShaderProgram *program) {
         if(!programStatus) {
             char infoLog[512];
             glGetProgramInfoLog(programHandle, 512, NULL, infoLog);
-            throw std::runtime_error("Couldn't link basicLit modules: " + std::string(infoLog));
+            throw std::runtime_error("Couldn't link program modules (Did you forget to add modules to the program?): " + std::string(infoLog));
         }
     }
     glLinkProgram(depthProgramHandle);

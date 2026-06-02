@@ -72,6 +72,13 @@ namespace PaperStocking {
 
             static void RegisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite);
             static void UnregisterSpriteRenderable(std::shared_ptr<SpriteRenderable> sprite);
+
+            static void SetUniformM4(uint shaderHandle, std::string name, glm::mat4 value);
+            static void SetUniformV4(uint shaderHandle, const std::string& name, glm::vec4 value);
+            static void SetUniformV3(uint shaderHandle, std::string name, glm::vec3 value);
+            static void SetUniformV2(uint shaderHandle, std::string name, glm::vec2 value);
+            static void SetUniformF(uint shaderHandle, std::string name, float value);
+            static void SetUniformI(uint shaderHandle, std::string name, int value);
         private:
             static inline Renderer* s_Instance;
             std::unique_ptr<DebugUiManager> m_DebugUi;
@@ -90,6 +97,7 @@ namespace PaperStocking {
             glm::uvec2 m_OutputResolution = {1280, 720};
 
             struct GBuffer {
+                ShaderProgram* gBufferShader;
                 // Framebuffer for the GBuffer
                 GPU_LOC frameBuffer;
                 // Framebuffer for the depth prepass
@@ -115,7 +123,6 @@ namespace PaperStocking {
 
             //  UBOs
             GPU_LOC m_CamDataUBO;
-
 
             // Actual render data
             std::vector<std::shared_ptr<SpriteRenderable>> m_Sprites;

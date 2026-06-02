@@ -1,9 +1,12 @@
 #include <PaperStocking/graphics/camera.hpp>
+#include <PaperStocking/graphics/renderer.hpp>
 
 using namespace PaperStocking;
 
 const glm::mat4 Camera::GetProjMatrix() {
-    return glm::ortho(-size, size, -size, size);
+    glm::uvec2 resolution = Renderer::GetRenderResolution();
+    float aspectRatio = resolution.x / resolution.y;
+    return glm::ortho(-size * aspectRatio, size * aspectRatio, -size, size, near, far);
 }
 
 const glm::mat4 Camera::GetViewMatrix() {

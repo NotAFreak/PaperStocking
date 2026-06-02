@@ -135,5 +135,6 @@ namespace PaperStocking {
 
             static void UploadFrameData();
             static void EventListener(SDL_Event& event);
+            static void ResizeColorAttachment(int texture, GLenum format, unsigned int width, unsigned int height, GLenum type, GLenum pixelFormat);
     };
 }

@@ -4,7 +4,7 @@
 using namespace PaperStocking;
 
 const glm::mat4 Camera::GetProjMatrix() {
-    glm::uvec2 resolution = Renderer::GetRenderResolution();
+    glm::vec2 resolution = Renderer::GetRenderResolution();
     float aspectRatio = resolution.x / resolution.y;
     return glm::ortho(-size * aspectRatio, size * aspectRatio, -size, size, near, far);
 }

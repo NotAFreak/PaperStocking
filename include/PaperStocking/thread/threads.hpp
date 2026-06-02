@@ -1,10 +1,12 @@
 #pragma once
 #include <map>
+#include <chrono>
 #include <thread>
 #include <string>
 namespace PaperStocking {
+	using GameClock = std::chrono::steady_clock;
 	struct ThreadInfo {
-		std::string name;
+		std::string name = "???";
 		int priority = 0;
 	};
 	struct Threads {

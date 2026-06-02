@@ -39,6 +39,10 @@ void ShaderManager::CompileFromQueues() {
 
 std::shared_ptr<ShaderProgram> ShaderManager::GetShaderProgram(std::string name) {
     if (s_Instance->m_Programs.contains(name)) {
+        if (s_Instance->m_Programs[name].expired()) {
+            s_Instance->m_Programs.erase(name);
+            return LoadProgram(std::string(ASSETS_DIRECTORY) + "/" + SHADER_DIRECTORY + "/" + SHADER_PROGRAM_DIRECTORY + "/" + name);
+        }
         return s_Instance->m_Programs[name].lock();
     }
     return LoadProgram(std::string(ASSETS_DIRECTORY) + "/" + SHADER_DIRECTORY + "/" + SHADER_PROGRAM_DIRECTORY + "/" + name);

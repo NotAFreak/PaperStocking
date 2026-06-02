@@ -1,5 +1,4 @@
 #include <thread>
-
 #include <PaperStocking/engine.hpp>
 #include <PaperStocking/debug/timer.hpp>
 #include <PaperStocking/graphics/renderer.hpp>
@@ -7,6 +6,8 @@
 using namespace PaperStocking;
 
 void Engine::RenderThread() {
+	ThreadTime time = ThreadTime(std::this_thread::get_id(), "Render", 3);
+
 	Threads::SetThread(ThreadInfo{
 		"Render",1
 	});

@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include <tclap/CmdLine.h>
 #include <PaperStocking/logger.hpp>
+#include <PaperStocking/time/time.hpp>
 #include <PaperStocking/thread/threads.hpp>
 #include <PaperStocking/game/gameManager.hpp>
 #include <PaperStocking/assets/assetManager.hpp>
@@ -43,6 +44,7 @@ namespace PaperStocking {
 
 			template<typename EntrySystem>
 			static void GameThread() {
+				ThreadTime time = ThreadTime(std::this_thread::get_id(), "Game", 3);
 				Threads::SetThread(ThreadInfo{
 					"Game",1
 				});

@@ -317,7 +317,14 @@ void Renderer::SetOutputResolution(glm::uvec2 resolution, bool setWindow) {
         static_cast<uint>(static_cast<float>(s_Instance->m_OutputResolution.x) * s_Instance->m_RenderScale),
         static_cast<uint>(static_cast<float>(s_Instance->m_OutputResolution.y) * s_Instance->m_RenderScale)
     };
+    ResizeColorAttachment(s_Instance->m_GBuffer.color, GL_RGBA8, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGBA);
+    ResizeColorAttachment(s_Instance->m_GBuffer.position, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    ResizeColorAttachment(s_Instance->m_GBuffer.norm, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    ResizeColorAttachment(s_Instance->m_GBuffer.lighting, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    glBindRenderbuffer(GL_RENDERBUFFER, s_Instance->m_GBuffer.depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y);
     glViewport(0, 0, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y);
+
     s_Instance->m_UiRenderInterface->SetViewport(s_Instance->m_OutputResolution.x, s_Instance->m_OutputResolution.y);
 }
 void Renderer::SetRenderScale(float scale) {
@@ -327,6 +334,12 @@ void Renderer::SetRenderScale(float scale) {
         static_cast<uint>(static_cast<float>(s_Instance->m_OutputResolution.x) * s_Instance->m_RenderScale),
         static_cast<uint>(static_cast<float>(s_Instance->m_OutputResolution.y) * s_Instance->m_RenderScale)
     };
+    ResizeColorAttachment(s_Instance->m_GBuffer.color, GL_RGBA8, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGBA);
+    ResizeColorAttachment(s_Instance->m_GBuffer.position, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    ResizeColorAttachment(s_Instance->m_GBuffer.norm, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    ResizeColorAttachment(s_Instance->m_GBuffer.lighting, GL_RGB16F, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y, GL_UNSIGNED_BYTE, GL_RGB);
+    glBindRenderbuffer(GL_RENDERBUFFER, s_Instance->m_GBuffer.depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y);
     glViewport(0, 0, s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y);
 }
 
@@ -479,4 +492,9 @@ void Renderer::SetUniformI(uint shaderHandle, std::string name, int value) {
         s_Instance->m_Logger.Warning("Couldn't find uniform: " + name);
     }
     glUniform1i(modelUniform, value);
+}
+
+void Renderer::ResizeColorAttachment(int texture, GLenum format, unsigned int width, unsigned int height, GLenum type, GLenum pixelFormat) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, pixelFormat, type, NULL);
 }

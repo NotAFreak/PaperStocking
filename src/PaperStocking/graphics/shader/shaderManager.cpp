@@ -1,26 +1,72 @@
-#include <PaperStocking/graphics/shader/shaderManager.hpp>
 #include <cassert>
-#include <filesystem>
 #include <fstream>
+#include <filesystem>
 #include <PaperStocking/graphics/renderer.hpp>
+#include <PaperStocking/graphics/shader/shaderManager.hpp>
 
 using namespace PaperStocking;
 
 ShaderManager::ShaderManager() {
     assert(s_Instance == nullptr);
     s_Instance = this;
+    m_Thread = std::this_thread::get_id();
 }
 ShaderManager::~ShaderManager() {
     assert(s_Instance != nullptr);
     s_Instance = nullptr;
 }
 
-void ShaderManager::CompileShaders() {
-    CompileAllModules();
-    CompileAllPrograms();
+void ShaderManager::CompileFromQueues() {
+    assert(s_Instance != nullptr);
+    assert(std::this_thread::get_id() == s_Instance->m_Thread);
+    {
+        std::lock_guard lock(s_Instance->m_ModuleCompileQueue_mutex);
+        while (!s_Instance->m_ModuleCompileQueue.empty()) {
+            std::shared_ptr<ShaderModule>& module = s_Instance->m_ModuleCompileQueue.front();
+            CompileShaderModule(module);
+            s_Instance->m_ModuleCompileQueue.pop();
+        }
+    }
+    {
+        std::lock_guard lock(s_Instance->m_ProgramCompileQueue_mutex);
+        while (!s_Instance->m_ProgramCompileQueue.empty()) {
+            std::shared_ptr<ShaderProgram>& program = s_Instance->m_ProgramCompileQueue.front();
+            CompileShaderProgram(program);
+            s_Instance->m_ProgramCompileQueue.pop();
+        }
+    }
 }
 
-void ShaderManager::LoadModule(std::filesystem::path path) {
+std::shared_ptr<ShaderProgram> ShaderManager::GetShaderProgram(std::string name) {
+    if (s_Instance->m_Programs.contains(name)) {
+        return s_Instance->m_Programs[name].lock();
+    }
+    return LoadProgram(std::string(ASSETS_DIRECTORY) + "/" + SHADER_DIRECTORY + "/" + SHADER_PROGRAM_DIRECTORY + "/" + name);
+}
+std::map<std::string, std::weak_ptr<ShaderProgram>>* ShaderManager::GetShaderPrograms() {
+    return &s_Instance->m_Programs;
+}
+
+std::shared_ptr<ShaderModule> ShaderManager::GetShaderModule(std::string name) {
+    if (s_Instance->m_Modules.contains(name)) {
+        if (s_Instance->m_Modules[name].expired()) {
+            s_Instance->m_Modules.erase(name);
+            return LoadModule(std::string(ASSETS_DIRECTORY) + "/" + SHADER_DIRECTORY + "/" + SHADER_MODULES_DIRECTORY + "/" + name);
+        }
+        return s_Instance->m_Modules[name].lock();
+    }
+    return LoadModule(std::string(ASSETS_DIRECTORY) + "/" + SHADER_DIRECTORY + "/" + SHADER_MODULES_DIRECTORY + "/" + name);
+}
+std::map<std::string, std::weak_ptr<ShaderModule>>* ShaderManager::GetShaderModules() {
+    return &s_Instance->m_Modules;
+}
+
+
+std::shared_ptr<ShaderModule> ShaderManager::LoadModule(std::filesystem::path path) {
+    assert(s_Instance != nullptr);
+    if (s_Instance->m_Modules.contains(path)) {
+        return s_Instance->m_Modules[path].lock();
+    }
     ShaderManager::s_Instance->m_Logger.Info(std::string("Found module: ") + path.string());
     ShaderModule::ModuleType type;
     if(path.extension() == SHADER_VERTEX_EXTENSION) {
@@ -32,27 +78,28 @@ void ShaderManager::LoadModule(std::filesystem::path path) {
     } else if(path.extension() == SHADER_TESSELLATION_EXTENSION) {
         type = ShaderModule::ModuleType::TESSELATION;
     } else {
-        s_Instance->m_Logger.Error(std::string("Unknown basicLit type: ") + path.string());
+        s_Instance->m_Logger.Error(std::string("Unknown shader type: ") + path.string());
     }
-    ShaderModule module = ShaderModule(type, path.string());
-    CompileShaderModule(&module);
+    std::shared_ptr<ShaderModule> module = std::make_shared<ShaderModule>(type, path.string());
 
-    s_Instance->m_Logger.Info("Compiled module with handle: " + std::to_string(module.handle));
-    s_Instance->m_Modules.insert_or_assign(path.filename().string(), module);
-}
-
-void ShaderManager::LoadModuleDirectory(std::filesystem::path path) {
-    std::filesystem::directory_iterator it(path);
-    for (std::filesystem::directory_entry dir : it) {
-        if (dir.is_directory()) {
-            LoadModuleDirectory(dir.path());
-        } else {
-            LoadModule(dir.path());
-        }
+    if (std::this_thread::get_id() == s_Instance->m_Thread) {
+        CompileShaderModule(module);
+    } else {
+        std::lock_guard lock(s_Instance->m_ModuleCompileQueue_mutex);
+        s_Instance->m_ModuleCompileQueue.push(module);
     }
-}
 
-void ShaderManager::LoadProgram(std::filesystem::path path) {
+    s_Instance->m_Modules.insert_or_assign(path.filename().string(), std::weak_ptr<ShaderModule>(module));
+    return module;
+}
+std::shared_ptr<ShaderProgram> ShaderManager::LoadProgram(std::filesystem::path path) {
+    assert(s_Instance != nullptr);
+    if (s_Instance->m_Programs.contains(path)) {
+        return s_Instance->m_Programs[path].lock();
+    }
+    if (!std::filesystem::exists(path)) {
+        throw std::runtime_error("Path not found for shader program: " + path.string());
+    }
     std::vector<std::string> modulePaths;
     {
         std::ifstream inFile = std::ifstream(path);
@@ -70,57 +117,23 @@ void ShaderManager::LoadProgram(std::filesystem::path path) {
         }
         inFile.close();
     }
-    ShaderProgram program = ShaderProgram(path.filename());
+    std::shared_ptr<ShaderProgram> program = std::make_shared<ShaderProgram>(path.filename());
     for(std::string modulePath : modulePaths) {
-        ShaderModule* mod = &s_Instance->m_Modules[modulePath];
-        program.modules.insert_or_assign(mod->type, mod);
+        std::shared_ptr<ShaderModule> module = GetShaderModule(modulePath);
+        program->modules.insert_or_assign(module->type, module);
     }
 
-    CompileShaderProgram(&program);
-
-    s_Instance->m_Logger.Info("Compiled program with handle: " + std::to_string(program.handle));
-    s_Instance->m_Programs.insert_or_assign(path.filename().string(), program);
-}
-
-void ShaderManager::LoadProgramDirectory(std::filesystem::path path) {
-    std::filesystem::directory_iterator it(path);
-    for (std::filesystem::directory_entry dir : it) {
-        if (dir.is_directory()) {
-            LoadProgramDirectory(dir.path());
-        } else {
-            LoadProgram(dir.path());
-        }
+    if (std::this_thread::get_id() == s_Instance->m_Thread) {
+        CompileShaderProgram(program);
+    } else {
+        std::lock_guard lock(s_Instance->m_ProgramCompileQueue_mutex);
+        s_Instance->m_ProgramCompileQueue.push(program);
     }
-}
 
-void ShaderManager::CompileAllModules() {
-    std::filesystem::path moduleDirectory = std::filesystem::path(std::string(ASSETS_DIRECTORY) + "/" + std::string(SHADER_DIRECTORY) + "/" + SHADER_MODULES_DIRECTORY);
-    std::filesystem::directory_iterator it(moduleDirectory);
-
-    LoadModuleDirectory(moduleDirectory);
+    s_Instance->m_Programs.insert_or_assign(path.filename().string(), std::weak_ptr<ShaderProgram>(program));
+    return program;
 }
-void ShaderManager::CompileAllPrograms() {
-    std::filesystem::path programDirectory = std::filesystem::path(std::string(ASSETS_DIRECTORY) + "/" + std::string(SHADER_DIRECTORY) + "/" + SHADER_PROGRAM_DIRECTORY);
-    std::filesystem::directory_iterator it(programDirectory);
-
-    LoadProgramDirectory(programDirectory);
-}
-
-ShaderProgram* ShaderManager::GetShaderProgram(std::string name) {
-    return &s_Instance->m_Programs[name];
-}
-std::map<std::string, ShaderProgram>* ShaderManager::GetShaderPrograms() {
-    return &s_Instance->m_Programs;
-}
-
-ShaderModule* ShaderManager::GetShaderModule(std::string name) {
-    return &s_Instance->m_Modules[name];
-}
-std::map<std::string, ShaderModule>* ShaderManager::GetShaderModules() {
-    return &s_Instance->m_Modules;
-}
-
-void ShaderManager::CompileShaderModule(ShaderModule *module) {
+void ShaderManager::CompileShaderModule(std::shared_ptr<ShaderModule>& module) {
     assert(s_Instance != nullptr);
     std::string src;
     std::ifstream inFile;
@@ -157,14 +170,14 @@ void ShaderManager::CompileShaderModule(ShaderModule *module) {
             char infoLog[512];
             if(!compStatus) {
                 glGetShaderInfoLog(shaderHandle, 512, NULL, infoLog);
-                throw std::runtime_error("Couldn't compile shader: " + std::string(infoLog));
+                throw std::runtime_error("Couldn't compile shader module: " + std::string(infoLog));
             }
         }
     }
     module->handle = shaderHandle;
+    s_Instance->m_Logger.Info("Compiled module with handle: " + std::to_string(module->handle));
 }
-
-void ShaderManager::CompileShaderProgram(ShaderProgram *program) {
+void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program) {
     assert(s_Instance != nullptr);
     uint32_t programHandle = glCreateProgram();
     uint32_t depthProgramHandle = glCreateProgram();
@@ -178,8 +191,8 @@ void ShaderManager::CompileShaderProgram(ShaderProgram *program) {
             glAttachShader(depthProgramHandle, shaderModule.second->handle);
         }
     }
-    ShaderModule* emptyFrag = ShaderManager::GetShaderModule("empty.frag");
-    glAttachShader(depthProgramHandle, emptyFrag->handle);
+    std::shared_ptr<ShaderModule> depthFrag = ShaderManager::GetShaderModule("depth.frag");
+    glAttachShader(depthProgramHandle, depthFrag->handle);
 
     {
         int programStatus;
@@ -222,4 +235,5 @@ void ShaderManager::CompileShaderProgram(ShaderProgram *program) {
 
     program->handle = programHandle;
     program->depthHandle = depthProgramHandle;
+    s_Instance->m_Logger.Info("Compiled program with handle: " + std::to_string(program->handle));
 }

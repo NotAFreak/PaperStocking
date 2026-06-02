@@ -10,13 +10,13 @@ namespace PaperStocking {
     struct Material {
         public:
             std::string shaderName;
-            ShaderProgram* shader;
+            std::shared_ptr<ShaderProgram> shader;
             
             std::vector<Uniform> uniforms;
 
             Material(Material&&) = default;
             Material(std::string shaderName);
-            Material(ShaderProgram* shader);
+            Material(std::shared_ptr<ShaderProgram> shader);
     };
     // Used for saving and loading information about the material
     struct MaterialData {

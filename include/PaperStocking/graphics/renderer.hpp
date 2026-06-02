@@ -97,7 +97,7 @@ namespace PaperStocking {
             glm::uvec2 m_OutputResolution = {1280, 720};
 
             struct GBuffer {
-                ShaderProgram* gBufferShader;
+                std::shared_ptr<ShaderProgram> gBufferShader;
                 // Framebuffer for the GBuffer
                 GPU_LOC frameBuffer;
                 // Framebuffer for the depth prepass

@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
+#include <memory>
 #include "shaderModule.hpp"
 
 namespace PaperStocking {
@@ -9,7 +10,7 @@ namespace PaperStocking {
             std::string name;
             uint32_t handle = 0U;
             uint32_t depthHandle = 0U;
-            std::map<ShaderModule::ModuleType, ShaderModule*> modules;
+            std::map<ShaderModule::ModuleType, std::shared_ptr<ShaderModule>> modules;
 
             // Only existing so compiler doesn't scream at me. Don't use.
             inline ShaderProgram() { }

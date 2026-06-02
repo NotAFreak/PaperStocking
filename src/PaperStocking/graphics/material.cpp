@@ -7,7 +7,7 @@ Material::Material(std::string shaderName) {
     this->shaderName = shaderName;
     this->shader = ShaderManager::GetShaderProgram(shaderName);
 }
-Material::Material(ShaderProgram* shader) {
+Material::Material(std::shared_ptr<ShaderProgram> shader) {
     this->shader = shader;
     this->shaderName = shader->name;
 }

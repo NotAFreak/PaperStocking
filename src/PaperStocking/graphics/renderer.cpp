@@ -80,35 +80,32 @@ Renderer::Renderer() {
 
     RawInput::SubscribeListener(EventListener);
 
-    ShaderManager::CompileAllModules();
-    ShaderManager::CompileAllPrograms();
-
     // Create GBuffer
     {
         // Create GBuffer
         glGenFramebuffers(1, &m_GBuffer.frameBuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, m_GBuffer.frameBuffer);
 
+        glGenTextures(1, &m_GBuffer.color);
+        glBindTexture(GL_TEXTURE_2D, m_GBuffer.color);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.color, 0);
+
         glGenTextures(1, &m_GBuffer.position);
         glBindTexture(GL_TEXTURE_2D, m_GBuffer.position);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGB, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.position, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.position, 0);
 
         glGenTextures(1, &m_GBuffer.norm);
         glBindTexture(GL_TEXTURE_2D, m_GBuffer.norm);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGB, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.norm, 0);
-
-        glGenTextures(1, &m_GBuffer.color);
-        glBindTexture(GL_TEXTURE_2D, m_GBuffer.color);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_RenderResolution.x, m_RenderResolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.color, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.norm, 0);
 
         glGenTextures(1, &m_GBuffer.lighting);
         glBindTexture(GL_TEXTURE_2D, m_GBuffer.lighting);
@@ -149,6 +146,8 @@ Renderer::Renderer() {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_GBuffer.depth);
         glDepthFunc(GL_LEQUAL);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        m_GBuffer.gBufferShader = ShaderManager::GetShaderProgram("gbuffer");
     }
 
     // Create quad
@@ -214,6 +213,8 @@ void Renderer::Render() {
     Timer::Begin("Execute UI Events");
     UiManager::ExecuteAllEvents(UiExecThread::Render);
     Timer::End();
+
+    ShaderManager::CompileFromQueues();
 
     Timer::Begin("Unload textures");
     {

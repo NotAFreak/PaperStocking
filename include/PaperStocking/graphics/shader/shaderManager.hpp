@@ -1,10 +1,11 @@
 #pragma once
+#include <map>
+#include <thread>
+#include <memory>
+#include <filesystem>
 #include <PaperStocking/logger.hpp>
 #include <PaperStocking/graphics/shader/shaderModule.hpp>
 #include <PaperStocking/graphics/shader/shaderProgram.hpp>
-#include <map>
-#include <thread>
-#include <filesystem>
 
 // Extensions
 #ifndef SHADER_FRAGMENT_EXTENSION
@@ -43,28 +44,30 @@ namespace PaperStocking {
             ShaderManager();           
             ~ShaderManager();
 
-            static void CompileShaders();
-            static void CompileAllModules();
-            static void CompileAllPrograms();
+            static void CompileFromQueues();
 
-            static void CompileShaderProgram(ShaderProgram* program);
-            static void CompileShaderModule(ShaderModule* module);
-
-            static ShaderProgram* GetShaderProgram(std::string name);
-            static std::map<std::string, ShaderProgram>* GetShaderPrograms();
+            static std::shared_ptr<ShaderProgram> GetShaderProgram(std::string name);
+            static std::map<std::string, std::weak_ptr<ShaderProgram>>* GetShaderPrograms();
             
-            static ShaderModule* GetShaderModule(std::string name);
-            static std::map<std::string, ShaderModule>* GetShaderModules();
+            static std::shared_ptr<ShaderModule> GetShaderModule(std::string name);
+            static std::map<std::string, std::weak_ptr<ShaderModule>>* GetShaderModules();
         private:
             inline static ShaderManager* s_Instance;
+            std::thread::id m_Thread;
             Logger m_Logger = Logger("Shader Manager", LogColour::Blue);
 
-            std::map<std::string, ShaderModule> m_Modules;
-            std::map<std::string, ShaderProgram> m_Programs;
+            std::map<std::string, std::weak_ptr<ShaderModule>> m_Modules;
+            std::map<std::string, std::weak_ptr<ShaderProgram>> m_Programs;
 
-            static void LoadModuleDirectory(std::filesystem::path path);
-            static void LoadModule(std::filesystem::path path);
-            static void LoadProgramDirectory(std::filesystem::path path);
-            static void LoadProgram(std::filesystem::path path);
+            std::queue<std::shared_ptr<ShaderModule>> m_ModuleCompileQueue;
+            std::mutex m_ModuleCompileQueue_mutex;
+            std::queue<std::shared_ptr<ShaderProgram>> m_ProgramCompileQueue;
+            std::mutex m_ProgramCompileQueue_mutex;
+
+            static std::shared_ptr<ShaderModule> LoadModule(std::filesystem::path path);
+            static std::shared_ptr<ShaderProgram> LoadProgram(std::filesystem::path path);
+
+            static void CompileShaderProgram(std::shared_ptr<ShaderProgram>& program);
+            static void CompileShaderModule(std::shared_ptr<ShaderModule>& module);
     };    
 }

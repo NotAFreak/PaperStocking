@@ -41,6 +41,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/SDL_image)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/RmlUi)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/json)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/box2d)
 
 # Create RmlUi backend
 set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
@@ -68,8 +69,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     RmlUi::RmlUi
     RmlUi::Debugger
     Freetype::Freetype
+    rmlui_backend_SDL_GL3
     EnTT::EnTT
     nlohmann_json
     SQLite::SQLite3
-    rmlui_backend_SDL_GL3
+    box2d::box2d
 )

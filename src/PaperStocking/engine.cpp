@@ -16,6 +16,7 @@ void Engine::RenderThread() {
 	RawInput::SubscribeListener(EventListener);
 	++m_InitializedThreads;
 	while (m_InitializedThreads < c_RequiredThreadCount) { }
+	time.Update();
 	while (s_Run) {
 		Timer::Begin("Poll Events");
 		input.PollEvents();
@@ -26,6 +27,7 @@ void Engine::RenderThread() {
 		Timer::End();
 
 		Timer::FinishThreadFrame();
+		time.Update();
 	}
 }
 void Engine::EventListener(SDL_Event& event) {

@@ -51,11 +51,18 @@ namespace PaperStocking {
 				NestedLogger logger = NestedLogger("Game Manager");
 				++m_InitializedThreads;
 				while (m_InitializedThreads < c_RequiredThreadCount) { }
+				time.Update();
 				logger.Begin();
 				GameManager gameManager;
 				GameManager::AddSystem<EntrySystem>();
 				while (s_Run) {
+					double maxUpdateTime = 1.0 / GAMEMANAGER_UPDATES_PERSECOND;
+					if(time.dDeltaTime < maxUpdateTime) {
+						int milliseconds = static_cast<int>((maxUpdateTime - time.dDeltaTime) * 1000);
+						std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+					}
 					gameManager.Update();
+					time.Update();
 				}
 				logger.End();
 			}

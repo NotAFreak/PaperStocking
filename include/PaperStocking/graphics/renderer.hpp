@@ -93,7 +93,7 @@ namespace PaperStocking {
             glm::vec4 m_ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
             glm::uvec2 m_RenderResolution = {1280, 720};
-            float m_RenderScale = 1.0f;
+            float m_RenderScale = 0.5f;
             glm::uvec2 m_OutputResolution = {1280, 720};
 
             struct GBuffer {

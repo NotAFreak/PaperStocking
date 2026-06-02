@@ -231,7 +231,7 @@ void Renderer::Render() {
         std::lock_guard lock(m_TextureUploadQueue_mutex);
         while(!m_TextureUploadQueue.empty()) {
             std::shared_ptr<Texture> texture = m_TextureUploadQueue.front();
-            texture->Unload();
+            texture->Upload();
             m_TextureUploadQueue.pop();
         }
     }

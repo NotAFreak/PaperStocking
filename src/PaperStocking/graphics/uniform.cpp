@@ -56,7 +56,6 @@ void PaperStocking::to_json(nlohmann::json& j, const Uniform& data) {
                     {"type", data.type},
                     {"name", data.name},
                     // {"value", data.textureValue->m_Location},
-                    {"texSlot", data.textureSlot},
                     };
             break;
     }
@@ -79,9 +78,9 @@ void PaperStocking::from_json(const nlohmann::json& j, Uniform& data) {
             break;
         case Type_Texture: {
             std::string textureLocation;
-            // j.at("value").get_to(data.textureValue.lock()->m_Location);
-            j.at("texSlot").get_to(data.textureSlot);
-            // Renderer::QueueTextureUpload(data.textureValue.lock());
+            j.at("value").get_to(textureLocation);
+            data.textureValue = std::make_shared<Texture>(textureLocation);
+            Renderer::QueueTextureUpload(std::shared_ptr<Texture>(data.textureValue));
         }
             break;
     }

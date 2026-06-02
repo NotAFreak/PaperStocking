@@ -170,12 +170,12 @@ void ShaderManager::CompileShaderModule(std::shared_ptr<ShaderModule>& module) {
             char infoLog[512];
             if(!compStatus) {
                 glGetShaderInfoLog(shaderHandle, 512, NULL, infoLog);
-                throw std::runtime_error("Couldn't compile shader module: " + std::string(infoLog));
+                throw std::runtime_error("Couldn't compile shader module (" + module->location + "): " + std::string(infoLog));
             }
         }
     }
     module->handle = shaderHandle;
-    s_Instance->m_Logger.Info("Compiled module with handle: " + std::to_string(module->handle));
+    s_Instance->m_Logger.Info("Compiled module (" + module->location + ") with handle: " + std::to_string(module->handle));
 }
 void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program) {
     assert(s_Instance != nullptr);
@@ -200,7 +200,7 @@ void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program
         if(programStatus) {
             char infoLog[512];
             glGetProgramInfoLog(programHandle, 512, NULL, infoLog);
-            s_Instance->m_Logger.Error("Couldn't attach shader modules: " + std::string(infoLog));
+            s_Instance->m_Logger.Error("Couldn't attach shader modules (" + program->name + "): " + std::string(infoLog));
         }
     }
     {
@@ -209,7 +209,7 @@ void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program
         if(programStatus) {
             char infoLog[512];
             glGetProgramInfoLog(depthProgramHandle, 512, NULL, infoLog);
-            s_Instance->m_Logger.Error("Couldn't attach depth prepass shader modules: " + std::string(infoLog));
+            s_Instance->m_Logger.Error("Couldn't attach depth prepass shader modules (" + program->name + "): " + std::string(infoLog));
         }
     }
     glLinkProgram(programHandle);
@@ -219,7 +219,7 @@ void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program
         if(!programStatus) {
             char infoLog[512];
             glGetProgramInfoLog(programHandle, 512, NULL, infoLog);
-            throw std::runtime_error("Couldn't link program modules (Did you forget to add modules to the program?): " + std::string(infoLog));
+            throw std::runtime_error("Couldn't link program modules (" + program->name + ") (Did you forget to add modules to the program?): " + std::string(infoLog));
         }
     }
     glLinkProgram(depthProgramHandle);
@@ -229,7 +229,7 @@ void ShaderManager::CompileShaderProgram(std::shared_ptr<ShaderProgram>& program
         if(!programStatus) {
             char infoLog[512];
             glGetProgramInfoLog(depthProgramHandle, 512, NULL, infoLog);
-            throw std::runtime_error("Couldn't link depth prepass shader modules: " + std::string(infoLog));
+            throw std::runtime_error("Couldn't link depth prepass shader modules (" + program->name + "): " + std::string(infoLog));
         }
     }
 

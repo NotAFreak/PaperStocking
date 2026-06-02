@@ -2,6 +2,7 @@
 #include <map>
 #include <thread>
 #include <memory>
+#include <queue>
 #include <filesystem>
 #include <PaperStocking/logger.hpp>
 #include <PaperStocking/graphics/shader/shaderModule.hpp>

@@ -96,6 +96,7 @@ void MetaDatabase::LoadToMemoryNoLock() {
 			row.magFilter = static_cast<TextureFilter>(sqlite3_column_int(s_Instance->m_TextureCmd, 5));
 			row.wrap = static_cast<TextureWrap>(sqlite3_column_int(s_Instance->m_TextureCmd, 6));
 			row.downsampleFilter = static_cast<TextureFilter>(sqlite3_column_int(s_Instance->m_TextureCmd, 7));
+			row.genMipmaps = sqlite3_column_int(s_Instance->m_TextureCmd, 8);
 
 			t_TextureMap.emplace(row.fileId, row);
 		}

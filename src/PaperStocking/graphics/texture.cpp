@@ -16,6 +16,8 @@ Texture::Texture(std::filesystem::path filePath) {
         throw std::runtime_error("Failed to load image data from path: " + filePath.string());
     }
     m_Pixels = data;
+    m_Width = w;
+    m_Height = h;
     if (MetaDB::MetaDatabase::HasTexture(filePath)) {
         MetaDB::T_Texture metadata = MetaDB::MetaDatabase::GetTexture(filePath);
         m_Format = metadata.format;

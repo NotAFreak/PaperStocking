@@ -21,6 +21,7 @@ namespace PaperStocking::MetaDB {
 		TextureFilter magFilter;
 		TextureWrap wrap;
 		TextureFilter downsampleFilter;
+		bool genMipmaps;
 	};
 
 	struct MetaDatabase {

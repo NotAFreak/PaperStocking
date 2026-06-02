@@ -21,7 +21,9 @@ std::shared_ptr<Material> MaterialManager::LoadMaterial(std::string name) {
         std::lock_guard lock(instance->materials_mutex);
         std::map<std::string, std::weak_ptr<Material>>::iterator it = instance->materials.find(name);
         if (it != instance->materials.end()) {
-            return it->second.lock();
+            if (!it->second.expired()) {
+                return it->second.lock();
+            }
         }
     }
     std::filesystem::path directory = std::filesystem::absolute(std::string(ASSETS_DIRECTORY) + "/" + std::string(MATERIAL_DIRECTORY));
@@ -45,5 +47,5 @@ std::shared_ptr<Material> MaterialManager::LoadMaterial(std::string name) {
 
     std::lock_guard lock(instance->materials_mutex);
     instance->materials.insert_or_assign(path.filename().stem(), std::weak_ptr<Material>(material));
-    return material;
+    return std::shared_ptr<Material>(material);
 }

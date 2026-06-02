@@ -25,9 +25,8 @@ namespace PaperStocking {
                 glm::vec2 vec2Value;
                 float floatValue;
                 int intValue;
-                // std::shared_ptr<Texture> textureValue;
             };
-            uint textureSlot = 0;
+            std::shared_ptr<Texture> textureValue;
 
             // ONLY USED FOR SERIALIZATION/DESERIALIZATION. DO NOT USE.
             Uniform() = default;

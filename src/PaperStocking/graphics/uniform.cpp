@@ -37,8 +37,8 @@ void PaperStocking::to_json(nlohmann::json& j, const Uniform& data) {
     switch (data.type) {
         case Type_Mat4:
             j = nlohmann::json {
-                    {"type", data.type},
-                    {"name", data.name}
+            {"type", data.type},
+            {"name", data.name}
             };
             break;
         case Type_Vec4:
@@ -53,10 +53,10 @@ void PaperStocking::to_json(nlohmann::json& j, const Uniform& data) {
             break;
         case Type_Texture:
             j = nlohmann::json {
-                    {"type", data.type},
-                    {"name", data.name},
-                    // {"value", data.textureValue->m_Location},
-                    };
+            {"type", data.type},
+            {"name", data.name},
+            // {"value", data.textureValue->m_Location},
+            };
             break;
     }
 }
@@ -81,7 +81,7 @@ void PaperStocking::from_json(const nlohmann::json& j, Uniform& data) {
             j.at("value").get_to(textureLocation);
             data.textureValue = std::make_shared<Texture>(textureLocation);
             Renderer::QueueTextureUpload(std::shared_ptr<Texture>(data.textureValue));
-        }
+            }
             break;
     }
 }

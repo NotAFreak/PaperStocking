@@ -10,6 +10,8 @@
 #include <PaperStocking/assets/assetManager.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
 
+#include <PaperStocking/input/input.hpp>
+
 namespace PaperStocking {
 	struct EngineStartInfo {
 		std::string m_ApplicationName;
@@ -71,6 +73,7 @@ namespace PaperStocking {
 
 			SettingsManager m_SettingsManager;
 			AssetManager m_AssetManager;
+			Input m_Input;
 			static inline std::atomic_uint8_t m_InitializedThreads = 0;
 			static constexpr uint8_t c_RequiredThreadCount = 2;
 	};

@@ -17,6 +17,7 @@ namespace PaperStocking {
             static void UnsubscribeListener(void(*listener)(SDL_Event&));
         private:
             static inline RawInput* instance;
+
             std::set<void(*)(SDL_Event&)> listeners;
     };
 }

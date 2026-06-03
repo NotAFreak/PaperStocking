@@ -9,9 +9,9 @@ namespace PaperStocking {
 			std::vector<bool> m_Keys;
 			KeyboardState();
 			~KeyboardState();
+
 			// Scancodes refer to physical key positions
 			bool IsScancode(const SDL_Scancode& scancode);
-
 			// Scancodes refer to what the keys themselves are
 			bool IsKeycode(const SDL_Keycode& keycode);
 	};

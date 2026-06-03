@@ -64,7 +64,7 @@ void Transform::SetGlobalEulerAngles(glm::vec3 angles) {
 	SetGlobalRotation(glm::quat(angles));
 }
 glm::vec3 Transform::Up() {
-	return GetGlobalRotation() * glm::vec3(0.0f, 1.0f, 0.0f);
+	return GetGlobalRotation() * glm::vec3(0.0f, -1.0f, 0.0f);
 }
 glm::vec3 Transform::Forward() {
 	return GetGlobalRotation() * glm::vec3(0.0f, 0.0f, 1.0f);
@@ -73,7 +73,7 @@ glm::vec3 Transform::Right() {
 	return GetGlobalRotation() * glm::vec3(1.0f, 0.0f, 0.0f);
 }
 glm::vec3 Transform::Down() {
-	return GetGlobalRotation() * glm::vec3(0.0f, -1.0f, 0.0f);
+	return GetGlobalRotation() * glm::vec3(0.0f, 1.0f, 0.0f);
 }
 glm::vec3 Transform::Back() {
 	return GetGlobalRotation() * glm::vec3(0.0f, 0.0f, -1.0f);

@@ -75,9 +75,6 @@ namespace PaperStocking {
 			InputBinding(InputBindingType type);
 			InputBinding(InputBindingType type, std::string mappingId);
 			~InputBinding() = default;
-
-			float ReadFloat();
-			glm::vec2 ReadVector();
 	};
 	void to_json(nlohmann::json& j, const InputBinding& data);
 	void from_json(const nlohmann::json& j, InputBinding& data);

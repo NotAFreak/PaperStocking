@@ -127,15 +127,6 @@ InputBinding::InputBinding(InputBindingType type, std::string mappingId) {
 			throw std::runtime_error("Unknown type: " + type);
 	}
 }
-
-float InputBinding::ReadFloat() {
-
-}
-
-glm::vec2 InputBinding::ReadVector() {
-
-}
-
 void PaperStocking::to_json(nlohmann::json& j, const InputBinding& data) {
 	std::string val;
 	// god i hope the union doesnt fuck this up
@@ -210,6 +201,22 @@ glm::vec2 InputAction::ReadVector() {
 	for (InputBinding& binding : m_Bindings) {
 		glm::vec2 composite = glm::vec2(0.0f);
 		switch (binding.m_Type) {
+			case InputBindingType::BINDINGTYPE_Keycode: {
+				KeyboardState& state = m_ParentController->m_CurrState.m_KeyboardState;
+				if (state.IsKeycode(binding.m_KeycodeMapping[0].m_KeyCode)) {
+					composite += glm::vec2{-1.0f, 0.0f};
+				}
+				if (state.IsKeycode(binding.m_KeycodeMapping[1].m_KeyCode)) {
+					composite += glm::vec2{0.0f, 1.0f};
+				}
+				if (state.IsKeycode(binding.m_KeycodeMapping[2].m_KeyCode)) {
+					composite += glm::vec2{1.0f, 0.0f};
+				}
+				if (state.IsKeycode(binding.m_KeycodeMapping[3].m_KeyCode)) {
+					composite += glm::vec2{0.0f, -1.0f};
+				}
+			}
+				break;
 			case InputBindingType::BINDINGTYPE_Scancode: {
 					KeyboardState& state = m_ParentController->m_CurrState.m_KeyboardState;
 					if (state.IsScancode(binding.m_ScancodeMapping[0].m_ScanCode)) {

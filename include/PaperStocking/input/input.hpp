@@ -100,7 +100,6 @@ namespace PaperStocking {
 		bool OnDown();
 		bool OnUp();
 		bool IsDown();
-		bool IsUp();
 
 		// Value type
 		float ReadValue();

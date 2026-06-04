@@ -288,7 +288,11 @@ static const std::map<std::string, SDL_Keycode> keycodeMap = std::map<std::strin
 	{"W", SDLK_W},
 	{"X", SDLK_X},
 	{"Y", SDLK_Y},
-	{"Z", SDLK_Z}
+	{"Z", SDLK_Z},
+	{"LEFT", SDLK_LEFT},
+	{"UP", SDLK_UP},
+	{"RIGHT", SDLK_RIGHT},
+	{"DOWN", SDLK_DOWN},
 };
 SDL_Keycode KeycodeInputMapping::GetKeycode(std::string id) {
 	if (keycodeMap.contains(id)) {
@@ -322,7 +326,11 @@ const static std::map<std::string, SDL_Scancode> scancodeMap = std::map<std::str
 	{"W", SDL_SCANCODE_W},
 	{"X", SDL_SCANCODE_X},
 	{"Y", SDL_SCANCODE_Y},
-	{"Z", SDL_SCANCODE_Z}
+	{"Z", SDL_SCANCODE_Z},
+	{"LEFT", SDL_SCANCODE_LEFT},
+	{"UP", SDL_SCANCODE_UP},
+	{"RIGHT", SDL_SCANCODE_RIGHT},
+	{"DOWN", SDL_SCANCODE_DOWN},
 };
 ScancodeInputMapping::ScancodeInputMapping(std::string id) {
 	this->m_Identifier = id;

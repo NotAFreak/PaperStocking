@@ -23,46 +23,57 @@ namespace PaperStocking {
 		BINDINGTYPE_Button = 2,
 		BINDINGTYPE_Axis = 3
 	};
+
 	class BaseInputMapping {
 		public:
 			std::string m_Identifier;
-			virtual std::string ToString() { }
-			virtual BaseInputMapping FromString() { }
 	};
 	class KeycodeInputMapping final : public BaseInputMapping {
 		public:
 			SDL_Keycode m_KeyCode;
-			static KeycodeInputMapping GetMapping(std::string id);
-			static KeycodeInputMapping GetMapping(SDL_Keycode keycode);
+			KeycodeInputMapping() = default;
+			KeycodeInputMapping(std::string id);
+
+			static SDL_Keycode GetKeycode(std::string id);
 	};
 	class ScancodeInputMapping final : public BaseInputMapping {
 		public:
 			SDL_Scancode m_ScanCode;
-			static ScancodeInputMapping GetMapping(std::string id);
+			ScancodeInputMapping() = default;
+			ScancodeInputMapping(std::string id);
+
+			static SDL_Scancode GetScancode(std::string id);
 	};
 	class ButtonInputMapping final : public BaseInputMapping {
 		public:
-			union {
-				SDL_GamepadButton m_Button_GP;
-				SDL_MouseButtonFlags m_Button_M;
-			};
-			static ButtonInputMapping GetMapping(std::string id);
+			SDL_GamepadButton m_Button_GP;
+			SDL_MouseButtonFlags m_Button_M;
+
+			ButtonInputMapping() = default;
+			ButtonInputMapping(std::string id);
 	};
 	class AxisInputMapping final : public BaseInputMapping {
 		public:
-			union {
-
-			};
-			static AxisInputMapping GetMapping(std::string id);
+			AxisInputMapping() = default;
+			AxisInputMapping(std::string id);
 	};
+
+	// Serialized
 	struct InputBinding {
 		public:
 			// Serialized
-			std::string m_Name;
+			InputBindingType m_Type;
 			// Serialized
-			BaseInputMapping m_Value;
+			// union {
+				KeycodeInputMapping m_KeycodeMapping[4];
+				ScancodeInputMapping m_ScancodeMapping[4];
+				AxisInputMapping m_AxisMapping[2];
+				ButtonInputMapping m_ButtonMapping[4];
+			// };
 
 			InputBinding() = default;
+			InputBinding(InputBindingType type);
+			InputBinding(InputBindingType type, std::string mappingId);
 			~InputBinding() = default;
 
 			float ReadFloat();
@@ -70,17 +81,23 @@ namespace PaperStocking {
 	};
 	void to_json(nlohmann::json& j, const InputBinding& data);
 	void from_json(const nlohmann::json& j, InputBinding& data);
+
+	// Serialized
+	struct InputController;
 	struct InputAction {
-		// Serialized
-		std::string m_ActionName;
 		// Serialized
 		InputActionType m_ActionType;
 		// Serialized
 		std::vector<InputBinding> m_Bindings;
 
-		void(*OnStarted);
-		void(*OnCanceled);
-		void(*OnPerformed);
+		InputController* m_ParentController = nullptr;
+
+		void(*OnStarted) = nullptr;
+		void(*OnCanceled) = nullptr;
+		void(*OnPerformed) = nullptr;
+
+		InputAction() = default;
+		~InputAction() = default;
 
 		// Button type
 		bool OnDown();
@@ -96,29 +113,50 @@ namespace PaperStocking {
 	};
 	void to_json(nlohmann::json& j, const InputAction& data);
 	void from_json(const nlohmann::json& j, InputAction& data);
+
 	// Serialized
 	struct InputController {
 		public:
+			struct StateData {
+				public:
+					KeyboardState m_KeyboardState;
+					MouseState m_MouseState;
+					GamepadState m_GamepadState;
+
+					StateData() {
+						m_KeyboardState = KeyboardState();
+						m_MouseState = MouseState();
+						m_GamepadState = GamepadState();
+					}
+			};
 			// Serialized
 			std::string m_Name;
-			std::thread::id m_ThreadId = std::this_thread::get_id();
 			// Serialized
 			std::map<std::string, InputAction> m_Actions;
 
+			StateData m_PrevState = StateData();
+			StateData m_CurrState = StateData();
+
+			InputController() = default;
+			~InputController() = default;
+			void Update();
 	};
 	void to_json(nlohmann::json& j, const InputController& data);
 	void from_json(const nlohmann::json& j, InputController& data);
+
 	struct Input {
 		public:
 			Input();
 			~Input();
 
-			static void UnloadInputController(std::shared_ptr<InputController> map);
-			static std::shared_ptr<InputController> LoadInputController(std::string name, std::thread::id thread = std::this_thread::get_id());
-			static void WriteInputController(std::shared_ptr<InputController>);
+			static void LoadAllInputs();
+			static void WriteAllInputs();
+
+			static void RegisterDefaultController(std::shared_ptr<InputController> controller);
+			static std::shared_ptr<InputController> GetInputController(std::string name, std::thread::id thread = std::this_thread::get_id());
 		private:
 			static inline Input* s_Instance;
-			std::map<std::thread::id, std::map<std::string,std::shared_ptr<InputController>>> m_InputControllers;
+			std::map<std::string, std::shared_ptr<InputController>> m_InputControllers;
 			std::mutex m_InputMaps_mutex;
 	};
 }

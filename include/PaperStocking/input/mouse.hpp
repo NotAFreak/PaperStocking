@@ -1,7 +1,10 @@
 #pragma once
 
 namespace PaperStocking {
-	struct Mouse {
+	struct MouseState {
 
+	};
+	struct Mouse {
+		
 	};
 }

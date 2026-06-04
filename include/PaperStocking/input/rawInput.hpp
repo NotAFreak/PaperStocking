@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include "mouse.hpp"
+#include "gamepad.hpp"
 #include "keyboard.hpp"
 #include <SDL3/SDL_events.h>
 namespace PaperStocking {

@@ -12,6 +12,8 @@
 
 #include <PaperStocking/input/input.hpp>
 
+#include <PaperStocking/debug/timer.hpp>
+
 namespace PaperStocking {
 	struct EngineStartInfo {
 		std::string m_ApplicationName;
@@ -63,7 +65,10 @@ namespace PaperStocking {
 						int milliseconds = static_cast<int>((maxUpdateTime - time.dDeltaTime) * 1000);
 						std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 					}
+					Timer::Begin("Game Manager");
 					gameManager.Update();
+					Timer::End();
+					Timer::FinishThreadFrame();
 					time.Update();
 				}
 				logger.End();

@@ -41,7 +41,8 @@ const std::map<std::thread::id, std::vector<TimerRecord>> Timer::GetTimings() {
 void Timer::FinishThreadFrame() {
 	{
 		std::lock_guard lock(s_Frames_mutex);
-		s_LastFrame = std::move(s_CurrentFrame);
+		s_LastFrame[std::this_thread::get_id()].clear();
+		s_LastFrame[std::this_thread::get_id()] = std::move(s_CurrentFrame[std::this_thread::get_id()]);
 		s_CurrentFrame.clear();
 	} {
 		std::lock_guard lock(s_TimerStack_Mutex);

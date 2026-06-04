@@ -34,5 +34,6 @@ void Engine::EventListener(SDL_Event& event) {
 	switch (event.type) {
 		case SDL_EVENT_QUIT:
 			s_Run = false;
+			break;
 	}
 }

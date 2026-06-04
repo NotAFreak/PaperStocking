@@ -21,19 +21,31 @@ GameManager::~GameManager() {
 
 void GameManager::Update() {
 	assert(s_Instance != nullptr);
+	Timer::Begin("UI Events");
 	UiManager::ExecuteAllEvents(UiExecThread::Game);
+	Timer::End();
 	{
+		Timer::Begin("Update Game Systems");
 		std::lock_guard lock(s_Instance->systems_mutex);
 		for(const std::shared_ptr<BaseSystem>& sys : s_Instance->systems) {
 			assert(sys != nullptr);
+			Timer::Begin(sys->GetName());
 			sys->Update();
+			Timer::End();
 		}
+		Timer::End();
 	} {
+		Timer::Begin("Update Scenes");
 		std::lock_guard lock(s_Instance->m_Scenes_mutex);
+		int index = 0;
 		for(const std::shared_ptr<Scene>& scene : s_Instance->m_Scenes) {
 			assert(scene != nullptr);
+			Timer::Begin("Scene [" + std::to_string(index) + "]");
 			scene->Update();
+			Timer::End();
+			index++;
 		}
+		Timer::End();
 	}
 }
 

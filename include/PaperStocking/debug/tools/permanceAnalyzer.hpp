@@ -5,6 +5,13 @@
 #include <PaperStocking/debug/debugTool.hpp>
 namespace PaperStocking {
     class PerformanceAnalyzer : public BaseDebugTool {
+        private:
+            bool LabeledCollapsingHeader(const std::string& name, const std::string& label) {
+                bool open = ImGui::CollapsingHeader(name.c_str());
+                ImGui::SameLine();
+                ImGui::Text(label.c_str());
+                return open;
+            }
         public:
             PerformanceAnalyzer() = default;
             ~PerformanceAnalyzer() override = default;
@@ -19,7 +26,14 @@ namespace PaperStocking {
                 {
                     ImGui::BeginGroup();
                     for (std::pair<std::thread::id, std::vector<TimerRecord>> pair : timings) {
-                        if (ImGui::CollapsingHeader(Threads::GetThread().name.c_str())) {
+                        // if (ImGui::CollapsingHeader(Threads::GetThread(pair.first).name.c_str())) {
+                        ThreadTime* time = Time::GetThreadTime(pair.first);
+                        if (time == nullptr) {
+                            ImGui::EndGroup();
+                            ImGui::End();
+                            return;
+                        }
+                        if (LabeledCollapsingHeader(Threads::GetThread(pair.first).name, std::to_string(1.0f / time->fDeltaTime) + "Hz")) {
                             for (TimerRecord& timing : pair.second) {
                                 DisplayRecord(timing);
                             }

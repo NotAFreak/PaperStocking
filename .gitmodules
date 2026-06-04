@@ -20,3 +20,6 @@
 [submodule "external/json"]
 	path = external/json
 	url = https://github.com/nlohmann/json.git
+[submodule "external/tmxlite"]
+	path = external/tmxlite
+	url = https://github.com/fallahn/tmxlite.git

@@ -42,6 +42,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/RmlUi)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/json)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/box2d)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/tmxlite/tmxlite)
 
 # Create RmlUi backend
 set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
@@ -74,4 +75,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     nlohmann_json
     SQLite::SQLite3
     box2d::box2d
+    tmxlite
 )

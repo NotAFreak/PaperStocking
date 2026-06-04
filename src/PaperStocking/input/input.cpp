@@ -260,88 +260,11 @@ void PaperStocking::from_json(const nlohmann::json& j, InputAction& data) {
 // oh god the mappings
 KeycodeInputMapping::KeycodeInputMapping(std::string id) {
 	this->m_Identifier = id;
-	this->m_KeyCode = GetKeycode(id);
+	this->m_KeyCode = SDL_GetKeyFromName(id.c_str());
 }
-static const std::map<std::string, SDL_Keycode> keycodeMap = std::map<std::string, SDL_Keycode> {
-	{"A", SDLK_A},
-	{"B", SDLK_B},
-	{"C", SDLK_C},
-	{"D", SDLK_D},
-	{"E", SDLK_E},
-	{"F", SDLK_F},
-	{"G", SDLK_G},
-	{"H", SDLK_H},
-	{"I", SDLK_I},
-	{"J", SDLK_J},
-	{"K", SDLK_K},
-	{"L", SDLK_L},
-	{"M", SDLK_M},
-	{"N", SDLK_N},
-	{"O", SDLK_O},
-	{"P", SDLK_P},
-	{"Q", SDLK_Q},
-	{"R", SDLK_R},
-	{"S", SDLK_S},
-	{"T", SDLK_T},
-	{"U", SDLK_U},
-	{"V", SDLK_V},
-	{"W", SDLK_W},
-	{"X", SDLK_X},
-	{"Y", SDLK_Y},
-	{"Z", SDLK_Z},
-	{"LEFT", SDLK_LEFT},
-	{"UP", SDLK_UP},
-	{"RIGHT", SDLK_RIGHT},
-	{"DOWN", SDLK_DOWN},
-};
-SDL_Keycode KeycodeInputMapping::GetKeycode(std::string id) {
-	if (keycodeMap.contains(id)) {
-		return keycodeMap.at(id);
-	}
-	throw std::runtime_error("Unknown Keycode: " + id);
-}
-const static std::map<std::string, SDL_Scancode> scancodeMap = std::map<std::string, SDL_Scancode> {
-	{"A", SDL_SCANCODE_A},
-	{"B", SDL_SCANCODE_B},
-	{"C", SDL_SCANCODE_C},
-	{"D", SDL_SCANCODE_D},
-	{"E", SDL_SCANCODE_E},
-	{"F", SDL_SCANCODE_F},
-	{"G", SDL_SCANCODE_G},
-	{"H", SDL_SCANCODE_H},
-	{"I", SDL_SCANCODE_I},
-	{"J", SDL_SCANCODE_J},
-	{"K", SDL_SCANCODE_K},
-	{"L", SDL_SCANCODE_L},
-	{"M", SDL_SCANCODE_M},
-	{"N", SDL_SCANCODE_N},
-	{"O", SDL_SCANCODE_O},
-	{"P", SDL_SCANCODE_P},
-	{"Q", SDL_SCANCODE_Q},
-	{"R", SDL_SCANCODE_R},
-	{"S", SDL_SCANCODE_S},
-	{"T", SDL_SCANCODE_T},
-	{"U", SDL_SCANCODE_U},
-	{"V", SDL_SCANCODE_V},
-	{"W", SDL_SCANCODE_W},
-	{"X", SDL_SCANCODE_X},
-	{"Y", SDL_SCANCODE_Y},
-	{"Z", SDL_SCANCODE_Z},
-	{"LEFT", SDL_SCANCODE_LEFT},
-	{"UP", SDL_SCANCODE_UP},
-	{"RIGHT", SDL_SCANCODE_RIGHT},
-	{"DOWN", SDL_SCANCODE_DOWN},
-};
 ScancodeInputMapping::ScancodeInputMapping(std::string id) {
 	this->m_Identifier = id;
-	this->m_ScanCode = GetScancode(id);
-}
-
-SDL_Scancode ScancodeInputMapping::GetScancode(std::string id) {
-	if (scancodeMap.contains(id)) {
-		return scancodeMap.at(id);
-	}
-	throw std::runtime_error("Unknown scancode: " + id);
+	this->m_ScanCode = SDL_GetScancodeFromName(id.c_str());
 }
 
 AxisInputMapping::AxisInputMapping(std::string id) {

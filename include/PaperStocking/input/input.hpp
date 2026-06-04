@@ -33,16 +33,12 @@ namespace PaperStocking {
 			SDL_Keycode m_KeyCode;
 			KeycodeInputMapping() = default;
 			KeycodeInputMapping(std::string id);
-
-			static SDL_Keycode GetKeycode(std::string id);
 	};
 	class ScancodeInputMapping final : public BaseInputMapping {
 		public:
 			SDL_Scancode m_ScanCode;
 			ScancodeInputMapping() = default;
 			ScancodeInputMapping(std::string id);
-
-			static SDL_Scancode GetScancode(std::string id);
 	};
 	class ButtonInputMapping final : public BaseInputMapping {
 		public:

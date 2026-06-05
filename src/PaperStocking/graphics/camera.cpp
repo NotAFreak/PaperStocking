@@ -14,6 +14,6 @@ const glm::mat4 Camera::GetViewMatrix() {
     glm::vec3 forward = transform.Forward();
     glm::vec3 up = transform.Up(); //// mmmmmm
 
-    glm::vec3 center = position + forward;
+    glm::vec3 center = position - forward;
     return glm::lookAt(position, center, up);
 }

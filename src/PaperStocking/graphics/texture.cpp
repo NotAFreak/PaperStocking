@@ -11,6 +11,7 @@ Texture::Texture(std::filesystem::path filePath) {
     uint8_t* data;
     int w, h;
     int channels;
+    stbi_set_flip_vertically_on_load(true);
     data = stbi_load(filePath.c_str(), &w, &h, &channels, STBI_rgb_alpha);
     if(!data) {
         throw std::runtime_error("Failed to load image data from path: " + filePath.string());

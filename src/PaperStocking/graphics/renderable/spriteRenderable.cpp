@@ -15,8 +15,6 @@ SpriteRenderable::~SpriteRenderable() {
 void SpriteRenderable::Render() {
 	if (m_Material.get() == nullptr) return;
 	glUseProgram(m_Material->shader->handle);
-	glDisable(GL_DEPTH_TEST);
-	glFrontFace(GL_CW);
 	int modelUniform = glGetUniformLocation(m_Material->shader->handle, "uModel");
 	if(modelUniform == -1) {
 		throw std::runtime_error("Couldn't find model uniform!");

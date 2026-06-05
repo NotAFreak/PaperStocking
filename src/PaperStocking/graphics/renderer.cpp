@@ -180,6 +180,7 @@ Renderer::Renderer() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         m_QuadData = gpuData;
     }
+    glCullFace(GL_BACK);
 }
 
 Renderer::~Renderer() {
@@ -245,6 +246,7 @@ void Renderer::Render() {
     // Actual Render
     Timer::Begin("Render Frame");
     Timer::Begin("Sprites");
+    glEnable(GL_DEPTH_TEST);
     {
         std::lock_guard lock(s_Instance->m_Sprites_mutex);
         for (auto& sprite : m_Sprites) {

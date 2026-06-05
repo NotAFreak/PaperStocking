@@ -1,15 +1,15 @@
 #pragma once
+#include <random>
 #include <cstdint>
 #include <iostream>
 
 namespace PaperStocking {
 	struct Random {
-		int seed = 0;
-		Random();
+		std::mt19937 seed;
+		Random() : seed(std::random_device{}()) {};
 		Random(int seed);
 		~Random() = default;
-		float Range(float min, float max, int decimalPrecision = 4);
+		float Range(float min, float max);
 		int Range(int min, int max);
-		uint Range(uint min, uint max);
 	};
 }

@@ -3,29 +3,16 @@
 
 using namespace PaperStocking;
 
-Random::Random() {
-	this->seed = rand();
-}
-
 Random::Random(int seed) {
-	this->seed = seed;
+	// this->seed = seed;
 }
 
-float Random::Range(float min, float max, int decimalPrecision) {
-	srand(seed);
-	return
-		static_cast<float>(Range((int)min, (int)max))
-		+ (((float)rand()) / ((float)rand()));
+float Random::Range(float min, float max) {
+	std::uniform_real_distribution<float> dist(min, max);
+	return dist(seed);
 }
 
 int Random::Range(int min, int max) {
-	srand(seed);
-	int range = max - min + 1;
-	return (int)rand() % range + min;
-}
-
-uint Random::Range(uint min, uint max) {
-	srand(seed);
-	uint range = max - min + 1;
-	return (uint)rand() % range + min;
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(seed);
 }

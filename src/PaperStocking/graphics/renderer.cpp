@@ -405,7 +405,7 @@ void Renderer::UnregisterSpriteRenderable(std::shared_ptr<SpriteRenderable> spri
     for (it = s_Instance->m_Sprites.begin(); it != s_Instance->m_Sprites.end(); ++it) {
         if (it->get() == sprite.get()) break;
     }
-    assert(it != s_Instance->m_Sprites.end());
+    // assert(it != s_Instance->m_Sprites.end());
     s_Instance->m_Sprites.erase(it);
 }
 

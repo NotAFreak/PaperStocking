@@ -43,6 +43,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/json)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/box2d)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/tmxlite/tmxlite)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/openal-soft)
 
 # Create RmlUi backend
 set(RMLUI_BACKEND_PATH ${RmlUi_SOURCE_DIR}/Backends)
@@ -76,4 +77,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     SQLite::SQLite3
     box2d::box2d
     tmxlite
+    OpenAL::OpenAL
 )

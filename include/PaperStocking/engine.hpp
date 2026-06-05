@@ -5,14 +5,13 @@
 #include <tclap/CmdLine.h>
 #include <PaperStocking/logger.hpp>
 #include <PaperStocking/time/time.hpp>
+#include <PaperStocking/input/input.hpp>
+#include <PaperStocking/debug/timer.hpp>
 #include <PaperStocking/thread/threads.hpp>
 #include <PaperStocking/game/gameManager.hpp>
+#include <PaperStocking/audio/audioManager.hpp>
 #include <PaperStocking/assets/assetManager.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
-
-#include <PaperStocking/input/input.hpp>
-
-#include <PaperStocking/debug/timer.hpp>
 
 namespace PaperStocking {
 	struct EngineStartInfo {
@@ -78,6 +77,7 @@ namespace PaperStocking {
 
 			SettingsManager m_SettingsManager;
 			AssetManager m_AssetManager;
+			AudioManager m_AudioManager;
 			Input m_Input;
 			static inline std::atomic_uint8_t m_InitializedThreads = 0;
 			static constexpr uint8_t c_RequiredThreadCount = 2;

@@ -47,6 +47,9 @@ void GameManager::Update() {
 		}
 		Timer::End();
 	}
+	Timer::Begin("Physics");
+	m_PhysicsManager.Update();
+	Timer::End();
 }
 
 std::weak_ptr<Scene> GameManager::LoadScene() {

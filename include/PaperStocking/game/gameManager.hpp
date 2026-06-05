@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <PaperStocking/physics/physicsManager.hpp>
 
 #ifndef GAMEMANAGER_UPDATES_PERSECOND
 #define GAMEMANAGER_UPDATES_PERSECOND 100
@@ -21,6 +22,7 @@ namespace PaperStocking {
 			static void UnloadScene(std::weak_ptr<Scene> scene);
 		private:
 			inline static GameManager* s_Instance;
+			PhysicsManager m_PhysicsManager;
 
 			std::vector<std::shared_ptr<Scene>> m_Scenes;
 			std::mutex m_Scenes_mutex;

@@ -14,5 +14,8 @@ PhysicsManager::~PhysicsManager() {
 }
 
 void PhysicsManager::Update() {
-	b2World_Step(world, time->fDeltaTime, s_SubSteps);
+	b2World_Step(world, time->fDeltaTime * s_TimeScale, s_SubSteps);
+
+	// Apply positions
+
 }

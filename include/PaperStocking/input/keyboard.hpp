@@ -7,6 +7,7 @@ namespace PaperStocking {
 		public:
 			int m_KeyCount;
 			std::vector<bool> m_Keys;
+			SDL_Keymod m_ModState;
 			KeyboardState();
 			~KeyboardState();
 

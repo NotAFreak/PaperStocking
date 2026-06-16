@@ -2,6 +2,8 @@
 cmake_minimum_required(VERSION 3.16.0)
 project(PaperStocking VERSION 0.1.0 LANGUAGES C CXX)
 
+option(PAPERSTOCKING_SHARED "Compile PaperStocking as a shared library" OFF)
+
 # Set options
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,8 +29,17 @@ file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.c*
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h*
 )
-add_library(${PROJECT_NAME} SHARED ${ENGINE_SOURCES})
+#if(${PAPERSTOCKING_SHARED})
+#    add_library(${PROJECT_NAME} SHARED ${ENGINE_SOURCES})
+#else()
+#    add_library(${PROJECT_NAME} STATIC ${ENGINE_SOURCES})
+#endif()
+add_library(${PROJECT_NAME} STATIC ${ENGINE_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+if(${SANITIZE_ADDRESSES})
+    target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+endif()
 
 # Libraries
 find_package(Freetype REQUIRED)
@@ -55,7 +66,7 @@ target_sources(rmlui_backend_SDL_GL3 INTERFACE
 target_include_directories(rmlui_backend_SDL_GL3 INTERFACE ${RMLUI_BACKEND_PATH})
 target_compile_definitions(rmlui_backend_SDL_GL3 INTERFACE
     RMLUI_SDL_VERSION_MAJOR=3
-    RMLUI_NUM_MSAA_SAMPLES=16
+    RMLUI_NUM_MSAA_SAMPLES=16 # mm i love not being able to chance graphics settings at runtime
     RMLUI_GL3_CUSTOM_LOADER=<glad/gl.h>
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -79,3 +90,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     tmxlite
     OpenAL::OpenAL
 )
+#target_link_libraries(${PROJECT_NAME} PRIVATE
+#    box2d::box2d
+#)

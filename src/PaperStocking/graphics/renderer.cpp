@@ -28,10 +28,16 @@ Renderer::Renderer() {
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+
+    SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+    if (SettingsManager::GetSetting("Graphics", "HighDPI", true)) {
+        windowFlags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    }
+
     s_Window = SDL_CreateWindow(Engine::info.m_ApplicationName.c_str(),
         s_Instance->m_OutputResolution.x, s_Instance->m_OutputResolution.y,
-        SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE |
-        SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY
+        windowFlags
     );
     if (s_Window == nullptr) {
         throw std::runtime_error("Couldn't create SDL window!: " + std::string(SDL_GetError()));

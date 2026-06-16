@@ -1,9 +1,7 @@
 #pragma once
 #include <box2d/box2d.h>
-
 #include <PaperStocking/math.hpp>
-
-#include "PaperStocking/game/transform.hpp"
+#include <PaperStocking/game/transform.hpp>
 
 namespace PaperStocking {
 	struct StaticRigidbody_CreateInfo {
@@ -12,7 +10,7 @@ namespace PaperStocking {
 		float rotation = 0.0f;
 	};
 	struct StaticRigidbody {
-		b2BodyId body;
+		b2BodyId body = b2_nullBodyId;
 
 		StaticRigidbody();
 		StaticRigidbody(const StaticRigidbody_CreateInfo& info);
@@ -31,7 +29,8 @@ namespace PaperStocking {
 		float angularVelocity = 0.0f;
 	};
 	struct KinematicRigidbody {
-		b2BodyId body;
+		b2BodyId body = b2_nullBodyId;
+		bool isDestroyed = false;
 
 		KinematicRigidbody();
 		KinematicRigidbody(const KinematicRigidbody_CreateInfo& info);
@@ -52,9 +51,21 @@ namespace PaperStocking {
 	struct DynamicRigidbody {
 		Transform* targetTransform = nullptr;
 		b2BodyId body;
+		bool isDestroyed = false;
 
 		DynamicRigidbody();
 		DynamicRigidbody(const DynamicRigidbody_CreateInfo& info);
 		~DynamicRigidbody();
+
+		void SetPosition(Vector2 pos);
+		Vector2 GetPosition();
+
+		void SetLinearVelocity(Vector2 velocity);
+		Vector2 GetLinearVelocity();
+
+		void AddLinearForce(Vector2 force);
+		void AddLinearForceFromPoint(Vector2 force, Vector2 point);
+
+		float GetMass();
 	};
 }

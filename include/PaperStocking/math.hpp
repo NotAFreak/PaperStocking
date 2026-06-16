@@ -1,6 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
 namespace PaperStocking {
+	// Multiply to convert degrees to radians
+	constexpr double DEGTORAD = 0.0174532925199432957; // which is PI / 180
+	// Multiply to convert radians to degrees
+	constexpr double RADTODEG = 57.295779513082320876; // and this is 180 / PI
+
 	// type aliases
 	// god i fucking love stealing other people's hard work
 	using Vector2 = glm::vec2;

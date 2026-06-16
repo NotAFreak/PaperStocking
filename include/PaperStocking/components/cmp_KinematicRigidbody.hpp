@@ -1,6 +1,6 @@
 #pragma once
 
 #include <PaperStocking/physics/rigidbody.hpp>
-namespace PaperStocking {
+namespace PaperStocking::Components {
 	using cmp_KinematicRigidbody = KinematicRigidbody;
 }

@@ -5,7 +5,6 @@
 
 namespace PaperStocking {
     struct Transform {
-        
         Transform* parent = nullptr;
 
         // Local position

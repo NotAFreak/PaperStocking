@@ -98,16 +98,22 @@ DynamicRigidbody::~DynamicRigidbody() {
 void DynamicRigidbody::SetPosition(Vector2 pos) {
 	b2Body_SetTransform(body, (b2Vec2){pos.x, pos.y}, b2Body_GetRotation(body));
 }
-
 Vector2 DynamicRigidbody::GetPosition() {
 	b2Vec2 pos = b2Body_GetPosition(body);
 	return Vector2 {pos.x, pos.y};
 }
 
+void DynamicRigidbody::SetRotation(float degrees) {
+
+}
+
+float DynamicRigidbody::GetRotation() {
+	return b2Rot_GetAngle(b2Body_GetRotation(body));
+}
+
 void DynamicRigidbody::SetLinearVelocity(Vector2 velocity) {
 	b2Body_SetLinearVelocity(body, b2Vec2(velocity.x, velocity.y));
 }
-
 Vector2 DynamicRigidbody::GetLinearVelocity() {
 	b2Vec2 vel = b2Body_GetLinearVelocity(body);
 	return Vector2 {vel.x, vel.y};
@@ -116,11 +122,9 @@ Vector2 DynamicRigidbody::GetLinearVelocity() {
 void DynamicRigidbody::AddLinearForce(Vector2 force) {
 	b2Body_ApplyForceToCenter(body, b2Vec2{force.x, force.y}, true);
 }
-
 void DynamicRigidbody::AddLinearForceFromPoint(Vector2 force, Vector2 point) {
 	b2Body_ApplyForce(body, b2Vec2{force.x, force.y}, b2Vec2{point.x, point.y}, true);
 }
-
 float DynamicRigidbody::GetMass() {
 	return b2Body_GetMass(body);
 }

@@ -49,6 +49,16 @@ void MetaDatabase::PrepareStatements() {
 			s_Instance->m_Logger.Error("Failed to prepare texture query!");
 		}
 	}
+	{
+		int rc = sqlite3_prepare_v2(s_Instance->m_Db,
+			"SELECT * FROM Texture;",
+			-1,&s_Instance->m_TextureCmd, nullptr
+		);
+
+		if (rc != SQLITE_OK) {
+			s_Instance->m_Logger.Error("Failed to prepare texture query!");
+		}
+	}
 }
 
 void MetaDatabase::LoadToMemory() {
@@ -74,7 +84,7 @@ void MetaDatabase::LoadToMemoryNoLock() {
 			T_MetaData row;
 			row.fileId = sqlite3_column_int64(s_Instance->m_MetadataCmd, 0);
 			row.filePath = reinterpret_cast<const char*>(sqlite3_column_text(s_Instance->m_MetadataCmd, 1));
-			row.type = sqlite3_column_int(s_Instance->m_MetadataCmd, 2);
+			row.type = static_cast<FileType>(sqlite3_column_int(s_Instance->m_MetadataCmd, 2));
 
 			t_MetadataMap.emplace(row.filePath, row);
 		}

@@ -60,6 +60,10 @@ namespace PaperStocking {
 		void SetPosition(Vector2 pos);
 		Vector2 GetPosition();
 
+		void SetRotation(float degrees);
+		// In Degrees
+		float GetRotation();
+
 		void SetLinearVelocity(Vector2 velocity);
 		Vector2 GetLinearVelocity();
 

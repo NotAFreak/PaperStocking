@@ -41,3 +41,16 @@ float Math::MagnitudeSq(Vector3 vector) {
 float Math::MagnitudeSq(Vector4 vector) {
 	return glm::length2(vector);
 }
+
+float Math::Lerp(float a, float b, float t) {
+	return a + (b-a) * t;
+}
+Vector2 Math::Lerp(Vector2 a, Vector2 b, float t) {
+	return a + (b-a) * t;
+}
+Vector3 Math::Lerp(Vector3 a, Vector3 b, float t) {
+	return a + (b-a) * t;
+}
+Vector4 Math::Lerp(Vector4 a, Vector4 b, float t) {
+	return a + (b-a) * t;
+}

@@ -13,6 +13,7 @@
 #include <PaperStocking/input/rawInput.hpp>
 #include <PaperStocking/graphics/renderer.hpp>
 #include <PaperStocking/settings/settingsManager.hpp>
+
 using namespace PaperStocking;
 Renderer::Renderer() {
     assert(s_Instance == nullptr);
@@ -308,6 +309,11 @@ void Renderer::Render() {
     Timer::End();
 }
 
+Camera &Renderer::GetCamera() {
+    assert(s_Instance != nullptr);
+    return s_Instance->m_Camera;
+}
+
 // GPU Calls
 const glm::vec4 Renderer::GetClearColor() {
     assert(s_Instance != nullptr);
@@ -371,8 +377,8 @@ float Renderer::GetRenderScale() {
 void Renderer::UploadFrameData() {
     assert(s_Instance != nullptr);
     {   // Upload camera data
-        glm::mat4 camMat = s_Instance->camera.GetFullMatrix();
-        glm::vec3 camPos = s_Instance->camera.transform.GetGlobalPosition();
+        glm::mat4 camMat = s_Instance->m_Camera.GetFullMatrix();
+        glm::vec3 camPos = s_Instance->m_Camera.transform.GetGlobalPosition();
         glm::vec2 screenSize = {s_Instance->m_RenderResolution.x, s_Instance->m_RenderResolution.y};
         s_Instance->m_CamData = {
             camMat,

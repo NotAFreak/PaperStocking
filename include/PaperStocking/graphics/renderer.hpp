@@ -49,12 +49,13 @@ namespace PaperStocking {
             static inline SpriteMeshGPUData m_QuadData = {0, 0, 0};
 
             static inline SDL_Window* s_Window;
-            Camera camera;
-            SDL_GLContext m_GlContext;
+            static inline SDL_GLContext m_GlContext;
 
             Renderer();
             ~Renderer();
             void Render();
+
+            static Camera& GetCamera();
 
             // GPU Requests
             static const glm::vec4 GetClearColor();
@@ -82,6 +83,7 @@ namespace PaperStocking {
         private:
             static inline Renderer* s_Instance;
             std::unique_ptr<DebugUiManager> m_DebugUi;
+            Camera m_Camera;
 
             UiManager m_UiManager;
             MaterialManager m_MaterialManager;

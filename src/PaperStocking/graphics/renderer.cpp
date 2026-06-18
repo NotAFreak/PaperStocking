@@ -245,11 +245,12 @@ void Renderer::Render() {
     }
     Timer::End();
 
+    //
     Timer::Begin("Upload Frame Data");
     UploadFrameData();
     Timer::End();
     Timer::End();
-
+    //
     // Actual Render
     Timer::Begin("Render Frame");
     Timer::Begin("Sprites");

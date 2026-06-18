@@ -57,10 +57,23 @@ void Input::LoadAllInputs() {
 		}
 	}
 }
-
 void Input::WriteAllInputs() {
 	assert(s_Instance != nullptr);
-
+	std::lock_guard lock(s_Instance->m_InputMaps_mutex);
+	{
+		std::vector<InputController> controllers = std::vector<InputController>(s_Instance->m_InputControllers.size());
+		for (auto& pair : s_Instance->m_InputControllers) {
+			// create and add a copy
+			controllers.push_back(InputController(*pair.second));
+		}
+		nlohmann::json complete;
+		for (const InputController& controller : controllers) {
+			complete.push_back(nlohmann::json(controller));
+		}
+		std::string filePath = INPUT_CONFIG_FILEPATH;
+		std::ofstream outFile = std::ofstream(filePath);
+		outFile << complete.dump(2);
+	}
 }
 
 std::shared_ptr<InputController> Input::GetInputController(std::string name, std::thread::id thread) {
@@ -78,7 +91,6 @@ void InputController::Update() {
 	m_PrevState = m_CurrState;
 	m_CurrState = StateData();
 }
-
 void PaperStocking::to_json(nlohmann::json& j, const InputController& data) {
 	j = nlohmann::json {
 		{"name", data.m_Name},
@@ -100,42 +112,71 @@ void to_json(nlohmann::json& j, const InputAction& data) {
 void from_json(const nlohmann::json& j, InputAction& data) {
 	// j.at("name").get_to(data.m_ActionName);
 	j.at("type").get_to(data.m_ActionType);
-	std::string bindings;
-	j.at("bindings").get_to(bindings);
+	// std::string bindings;
+	j.at("bindings").get_to(data.m_Bindings);
 }
 // Bindings
 InputBinding::InputBinding(InputBindingType type) {
 	this->m_Type = type;
 }
-
 InputBinding::InputBinding(InputBindingType type, std::string mappingId) {
 	this->m_Type = type;
-	switch (type) {
-		case InputBindingType::BINDINGTYPE_Keycode:
-
+	std::string id = mappingId;
+	switch (this->m_Type) {
+		case InputBindingType::BINDINGTYPE_Keycode: {
+			std::vector<std::string> codes;
+			std::string code = id;
+			std::erase(id, ' ');
+			std::stringstream ss(id);
+			while (ss.good()) {
+				std::string substr;
+				getline(ss, substr, ',');
+				codes.push_back(substr);
+			}
+			for (int i = 0; i < codes.size(); i++) {
+				this->m_KeycodeMapping[i] = KeycodeInputMapping(codes[i]);
+			}
+		}
 			break;
-		case InputBindingType::BINDINGTYPE_Scancode:
-			// this->m_ScancodeMapping = ScancodeInputMapping(mappingId);
+		case InputBindingType::BINDINGTYPE_Scancode: {
+			std::vector<std::string> codes;
+			std::string code = id;
+			std::erase(id, ' ');
+			std::stringstream ss(id);
+			while (ss.good()) {
+				std::string substr;
+				getline(ss, substr, ',');
+				codes.push_back(substr);
+			}
+			for (int i = 0; i < codes.size(); i++) {
+				this->m_ScancodeMapping[i] = ScancodeInputMapping(codes[i]);
+			}
+		}
 			break;
 		case InputBindingType::BINDINGTYPE_Axis:
-			// this->m_AxisMapping = AxisInputMapping(mappingId);
+			// data.m_AxisMapping = AxisInputMapping(id);
 			break;
 		case InputBindingType::BINDINGTYPE_Button:
-			// this->m_ButtonMapping = ButtonInputMapping(mappingId);
+			// data.m_ButtonMapping = ButtonInputMapping(id);
 			break;
 		default:
-			throw std::runtime_error("Unknown type: " + type);
+			throw std::runtime_error("Unknown type: " + m_Type);
 	}
 }
+
 void PaperStocking::to_json(nlohmann::json& j, const InputBinding& data) {
 	std::string val;
 	// god i hope the union doesnt fuck this up
 	switch (data.m_Type) {
 		case InputBindingType::BINDINGTYPE_Keycode:
-			// val = data.m_KeycodeMapping.m_Identifier;
+			for (int i = 0; i < 4; i++) {
+				val += data.m_KeycodeMapping[i].m_Identifier + ",";
+			}
 			break;
 		case InputBindingType::BINDINGTYPE_Scancode:
-			// val = data.m_ScancodeMapping.m_Identifier;
+			for (int i = 0; i < 4; i++) {
+				val += data.m_ScancodeMapping[i].m_Identifier + ",";
+			}
 			break;
 		case InputBindingType::BINDINGTYPE_Axis:
 			// val = data.m_AxisMapping.m_Identifier;
@@ -146,7 +187,7 @@ void PaperStocking::to_json(nlohmann::json& j, const InputBinding& data) {
 	}
 	j = nlohmann::json {
 		{"type", data.m_Type},
-		{"value", data.m_ButtonMapping->m_Identifier},
+		{"value", val},
 	};
 }
 void PaperStocking::from_json(const nlohmann::json& j, InputBinding& data) {

@@ -55,19 +55,34 @@ KinematicRigidbody::~KinematicRigidbody() {
 }
 
 // Dynamic rigidbody
+DynamicRigidbody_CreateInfo::DynamicRigidbody_CreateInfo(Vector2 position) {
+	this->m_Position = position;
+}
+
+DynamicRigidbody_CreateInfo::DynamicRigidbody_CreateInfo(Vector2 position, float rotation) {
+	this->m_Position = position;
+	this->m_Rotation = rotation;
+}
+
+DynamicRigidbody_CreateInfo::DynamicRigidbody_CreateInfo(Vector2 position, float rotation, RigidbodyLockFlags flags) {
+	this->m_Position = position;
+	this->m_Rotation = rotation;
+	this->m_LockFlags = flags;
+}
+
 DynamicRigidbody::DynamicRigidbody() {
 	assert(b2World_IsValid(PhysicsManager::s_World));
 	b2BodyDef bodyDef = b2DefaultBodyDef();
 	bodyDef.type = b2BodyType::b2_dynamicBody;
-	const DynamicRigidbody_CreateInfo info;
-	targetTransform = info.targetTransform;
-	bodyDef.position = b2Vec2(info.position.x, info.position.y);
-	bodyDef.linearDamping = info.linearDampening;
-	bodyDef.linearVelocity = b2Vec2(info.linearVelocity.x, info.linearVelocity.y);
+	const DynamicRigidbody_CreateInfo info = DynamicRigidbody_CreateInfo();
+	targetTransform = info.m_TargetTransform;
+	bodyDef.position = b2Vec2(info.m_Position.x, info.m_Position.y);
+	bodyDef.linearDamping = info.m_LinearDampening;
+	bodyDef.linearVelocity = b2Vec2(info.m_LinearVelocity.x, info.m_LinearVelocity.y);
 
-	bodyDef.rotation = b2MakeRot(info.rotation * M_PI / 180.0f);
-	bodyDef.angularDamping = info.angularDampening;
-	bodyDef.angularVelocity = info.angularVelocity;
+	bodyDef.rotation = b2MakeRot(info.m_Rotation * M_PI / 180.0f);
+	bodyDef.angularDamping = info.m_AngularDampening;
+	bodyDef.angularVelocity = info.m_AngularVelocity;
 
 	body = b2CreateBody(PhysicsManager::s_World, &bodyDef);
 	assert(b2Body_IsValid(body));
@@ -76,14 +91,15 @@ DynamicRigidbody::DynamicRigidbody(const DynamicRigidbody_CreateInfo &info) {
 	assert(b2World_IsValid(PhysicsManager::s_World));
 	b2BodyDef bodyDef = b2DefaultBodyDef();
 	bodyDef.type = b2BodyType::b2_dynamicBody;
-	targetTransform = info.targetTransform;
-	bodyDef.position = b2Vec2(info.position.x, info.position.y);
-	bodyDef.linearDamping = info.linearDampening;
-	bodyDef.linearVelocity = b2Vec2(info.linearVelocity.x, info.linearVelocity.y);
+	targetTransform = info.m_TargetTransform;
+	bodyDef.position = b2Vec2(info.m_Position.x, info.m_Position.y);
+	bodyDef.linearDamping = info.m_LinearDampening;
+	bodyDef.linearVelocity = b2Vec2(info.m_LinearVelocity.x, info.m_LinearVelocity.y);
 
-	bodyDef.rotation = b2MakeRot(info.rotation * DEGTORAD);
-	bodyDef.angularDamping = info.angularDampening;
-	bodyDef.angularVelocity = info.angularVelocity;
+	bodyDef.rotation = b2MakeRot(info.m_Rotation * DEGTORAD);
+	bodyDef.angularDamping = info.m_AngularDampening;
+	bodyDef.angularVelocity = info.m_AngularVelocity;
+	bodyDef.motionLocks = b2MotionLocks(info.m_LockFlags & LOCK_X, info.m_LockFlags & LOCK_Y, info.m_LockFlags & LOCK_ROT);
 
 	body = b2CreateBody(PhysicsManager::s_World, &bodyDef);
 	assert(b2Body_IsValid(body));

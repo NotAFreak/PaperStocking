@@ -11,7 +11,6 @@ RawInput::RawInput() {
     assert(instance == nullptr);
     instance = this;
 }
-
 RawInput::~RawInput() {
     assert(instance != nullptr);
     instance->listeners.clear();

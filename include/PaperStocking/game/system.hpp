@@ -1,9 +1,15 @@
 #pragma once
-#include "../PaperStocking/engine.hpp"
+#include <PaperStocking/engine.hpp>
 
 namespace PaperStocking {
 	class BaseSystem {
-		virtual void Load();
-		virtual void Update();
+		public:
+			BaseSystem() = default;
+			virtual ~BaseSystem() = default;
+			virtual void Load() { }
+			virtual void Update() { }
+			virtual std::string GetName() {
+				return "Unknown";
+			}
 	};
 }

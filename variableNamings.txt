@@ -1,0 +1,7 @@
+s_NAME = Static
+c_NAME = Constant
+m_NAME = Member
+
+t_NAME = Table (For Databases and related ONLY)
+cmp_NAME = Component (For Game shit ONLY)
+sys_NAME = System

@@ -1,9 +1,10 @@
 
 /external/cglm
-/external/entt
-/external/entt
-/external/json
-/external/RmlUi
-/external/SDL
-/external/SDL3_image
+# /external/entt
+# /external/json
+# /external/RmlUi
+# /external/SDL
+# /external/SDL3_image
 # /external/tclap
+# /external/RmlUi
+/external/glm/doc

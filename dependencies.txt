@@ -1,0 +1,2 @@
+libfreetype-dev
+libsqlite3-dev

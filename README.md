@@ -1,0 +1,1 @@
+This is a simple opengl 2d engine i made for fun, a good couple iterations, refactors and rewrites behind my current, much nicer architect-ed engine. Public cause why not. Isn't actively developed anymore.
